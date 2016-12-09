@@ -1,0 +1,107 @@
+{{#meta.aggregateId}} <hr> <strong> {{/meta.aggregateId}}
+{{^meta.aggregateId}} <h5> {{/meta.aggregateId}}
+Multisig modification transaction
+{{#meta.aggregateId}} </strong> {{/meta.aggregateId}}
+{{^meta.aggregateId}} </h5> {{/meta.aggregateId}}
+
+
+{{^meta.aggregateId}}
+<div class="row">
+	<div class="three columns">
+		Block:
+	</div>
+	<div class="eight columns">
+		<a href="#/block/{{meta.height_str}}">{{meta.height_str}}</a>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Hash:
+	</div>
+	<div class="eight columns mono">
+		{{meta.hash}}
+	</div>
+</div>
+{{/meta.aggregateId}}
+
+<div class="row">
+	<div class="three columns">
+		Sender:
+	</div>
+	<div class="eight columns mono">
+		<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		min delta approval:
+	</div>
+	<div class="eight columns mono">
+		{{transaction.minApprovalDelta}}
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		min delta removal:
+	</div>
+	<div class="eight columns mono">
+		{{transaction.minRemovalDelta}}
+	</div>
+</div>
+
+{{^meta.aggregateId}}
+<div class="row">
+	<div class="three columns">
+		Fee:
+	</div>
+	<div class="eight columns mono">
+		{{{transaction.fee_fmt}}}
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Deadline:
+	</div>
+	<div class="eight columns mono">
+		{{{transaction.deadline_fmt}}}
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Signature:
+	</div>
+	<div class="eight columns mono">
+		<small>{{transaction.signature}}</small>
+	</div>
+</div>
+{{/meta.aggregateId}}
+
+{{#transaction.properties.length}}
+<div class="row">
+	<div class="three columns">
+		Properties present:
+	</div>
+	<div class="eight columns mono">
+		<strong>{{transaction.properties.length}}</strong>
+	</div>
+</div>
+{{/transaction.properties.length}}
+
+{{#transaction.modifications}}
+<div class="row">
+	<div class="one column">&nbsp;
+	</div>
+	<div class="two columns">
+		{{type}}
+	</div>
+	<div class="eight columns mono">
+		<a href="#/account/{{cosignatoryPublicKey}}/0">{{cosignatoryPublicKey}}</a>
+	</div>
+</div>
+{{/transaction.modifications}}
+ 

@@ -1,0 +1,104 @@
+{{#meta.aggregateId}} <hr> <strong> {{/meta.aggregateId}}
+{{^meta.aggregateId}} <h5> {{/meta.aggregateId}}
+Register Namespace transaction
+{{#meta.aggregateId}} </strong> {{/meta.aggregateId}}
+{{^meta.aggregateId}} </h5> {{/meta.aggregateId}}
+
+
+{{^meta.aggregateId}}
+<div class="row">
+	<div class="three columns">
+		Block:
+	</div>
+	<div class="eight columns">
+		<a href="#/block/{{meta.height_str}}">{{meta.height_str}}</a>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Hash:
+	</div>
+	<div class="eight columns mono">
+		{{meta.hash}}
+	</div>
+</div>
+{{/meta.aggregateId}}
+
+<div class="row">
+	<div class="three columns">
+		Sender:
+	</div>
+	<div class="eight columns mono">
+		<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a>
+	</div>
+</div>
+
+{{^transaction.namespaceType}}
+<div class="row">
+	<div class="three columns">
+		ROOT namespace:
+	</div>
+	<div class="eight columns mono">
+		{{transaction.name}} <span class="dim">{{{transaction.namespaceId_fmt}}}</span>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Duration:
+	</div>
+	<div class="eight columns">
+		{{transaction.duration_fmt}}
+	</div>
+</div>
+{{/transaction.namespaceType}}
+
+{{#transaction.namespaceType}}
+<div class="row">
+	<div class="three columns">
+		namespace:
+	</div>
+	<div class="eight columns mono">
+		{{transaction.name}}
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Parent Id:
+	</div>
+	<div class="eight columns">
+		{{{transaction.parentId_fmt}}}
+	</div>
+</div>
+{{/transaction.namespaceType}}
+
+{{^meta.aggregateId}}
+<div class="row">
+	<div class="three columns">
+		Fee:
+	</div>
+	<div class="eight columns mono">
+		{{{transaction.fee_fmt}}}
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Deadline:
+	</div>
+	<div class="eight columns mono">
+		{{{transaction.deadline_fmt}}}
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Signature:
+	</div>
+	<div class="eight columns mono">
+		<small>{{transaction.signature}}</small>
+	</div>
+</div>
+{{/meta.aggregateId}}

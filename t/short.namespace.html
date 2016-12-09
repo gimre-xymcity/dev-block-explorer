@@ -1,0 +1,18 @@
+<tr class='data{{#className}} {{className}}{{/className}}'>
+<td class='mono'>
+	<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a> <br>
+	register NS: <b>{{transaction.name}}</b>
+	{{^transaction.namespaceType}}<u>ROOT ns</u> {{/transaction.namespaceType}}
+	{{#transaction.namespaceType}}, parentId {{{transaction.parentId_fmt}}} {{/transaction.namespaceType}}
+</td>
+<td>{{meta.height_str}} </td>
+<td>
+{{^transaction.namespaceType}}duration: {{{transaction.duration_fmt}}} {{/transaction.namespaceType}}
+	<br>fee: {{{transaction.fee_fmt}}} </td>
+<td>{{transaction.deadline_fmt}}</td>
+</tr>
+<tr class='txeshash'>
+<td class='mono' colspan=5>
+tx hash: <a href="#/namespace/{{meta.id}}">{{meta.hash}}</a>
+</td>
+</tr>

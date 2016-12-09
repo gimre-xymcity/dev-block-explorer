@@ -1,0 +1,20 @@
+
+{{#showNav}}
+<ul id="paging">
+	{{#showPrev}}
+	<li><a rel="prev" href="#/account/{{addr}}/{{prev}}">prev page (older txes)</a></li>
+	{{/showPrev}}
+	{{^showPrev}}
+	<li><a nohref>prev page (older txes)</a></li>
+	{{/showPrev}}
+
+	{{#showNext}}
+	<li><a rel="next" href="#/account/{{addr}}/{{next}}">next page</a></li>
+	{{/showNext}}
+	{{^showNext}}
+	<li><a nohref>next page</a></li>
+	{{/showNext}}
+
+</ul>
+{{/showNav}}
+

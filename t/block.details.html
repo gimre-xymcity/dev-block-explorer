@@ -1,0 +1,100 @@
+<div id="block">
+<h5>Block details</h5>
+<div class="row">
+	<div class="three columns">
+		Height:
+	</div>
+	<div class="three columns">
+		{{block.height_str}} <span class='dim'>(permalink: <a href="#/block/{{block.height_str}}">#</a>)</span>
+	</div>
+	<div class="three columns">
+		Difficulty:
+	</div>
+	<div class="three columns">
+		{{block.difficulty_fmt}} %  <span class='dim'>{{{block.difficulty_str}}}</span>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Timestamp:
+	</div>
+	<div class="nine columns">
+		{{block.timestamp_fmt}} <span class='dim'>nem time: {{block.timestamp_str}}</span>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Hash:
+	</div>
+	<div class="nine columns mono">
+		{{meta.hash}}
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Harvester:
+	</div>
+	<div class="nine columns">
+		<a class='mono' href="#/account/{{block.signer}}/0">{{block.signer}}</a>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		# Transactions:
+	</div>
+	<div class="nine columns">
+		<strong>{{meta.numTransactions}}</strong>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Fees:
+	</div>
+	<div class="nine columns">
+		<strong>{{{meta.totalFee_fmt}}}</strong>
+	</div>
+</div>
+
+<h6>state related data</h5>
+<div class="row">
+	<div class="three columns">
+		state hash:
+	</div>
+	<div class="nine columns mono">
+		<strong>{{{block.stateHash}}}</strong>
+	</div>
+</div>
+<div class="row">
+	<div class="three columns">
+		sub cache merkle roots:
+	</div>
+	<div class="nine columns">
+		&nbsp;
+	</div>
+</div>
+	{{#meta.subCacheMerkleRoots}}
+	<div class="row">
+		<div class="two columns">
+			&nbsp;:
+		</div>
+		<div class="ten columns mono">
+			{{.}}
+		</div>
+	</div>
+	{{/meta.subCacheMerkleRoots}}
+</div>
+
+<div id="block_transactions" class="txlist">
+
+<div class='spinner'>
+  <div class="double-bounce1"></div>
+  <div class="double-bounce2"></div>
+</div>
+
+</div>
+

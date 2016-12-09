@@ -1,0 +1,16 @@
+<tr class='data{{#className}} {{className}}{{/className}}'>
+<td class='mono'>
+	<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a> <br>
+	#mods {{transaction.modifications.length}}, 
+	min delta: approval {{transaction.minApprovalDelta}}, removal {{transaction.minRemovalDelta}}
+</td>
+<td>{{meta.height_str}} </td>
+<td>
+	<br>fee: {{{transaction.fee_fmt}}} </td>
+<td>{{transaction.deadline_fmt}}</td>
+</tr>
+<tr class='txeshash'>
+<td class='mono' colspan=5>
+tx hash: <a href="#/multisig/{{meta.id}}">{{meta.hash}}</a>
+</td>
+</tr>

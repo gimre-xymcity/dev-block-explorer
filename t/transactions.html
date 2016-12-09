@@ -1,0 +1,41 @@
+<h5>{{header}}</h5>
+<div id='empty'></div>
+<table id="transactions" class="u-full-width">
+  <thead>
+    <tr>
+      <th>Signer </th>
+      <th>Height </th>
+      <th> </th>
+      <th>Deadline </th>
+    </tr>
+  </thead>
+  <tbody id="datarows">
+    <tr id='animation'><td colspan="4">
+      <div class="spinner2">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
+	</td></tr>
+  </tbody>
+</table>
+
+{{#showNav}}
+<ul id="paging">
+	{{#prev}}
+	<li><a rel="prev" href="#/block/{{height}}/{{prev}}">prev page</a></li>
+	{{/prev}}
+	{{^prev}}
+	<li><a nohref>prev page</a></li>
+	{{/prev}}
+
+	{{#showNext}}
+	<li><a rel="next" href="#/block/{{height}}/{{next}}">next page</a></li>
+	{{/showNext}}
+	{{^showNext}}
+	<li><a nohref>next page</a></li>
+	{{/showNext}}
+
+</ul>
+{{/showNav}}
+

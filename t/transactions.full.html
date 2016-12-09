@@ -1,0 +1,34 @@
+<h5>Inner transactions</h5>
+<div id='empty'></div>
+
+<div id="aggregate_transactions" class="txlist">
+
+<div id='animation'>
+	<div class="spinner2">
+	<div class="bounce1"></div>
+	<div class="bounce2"></div>
+	<div class="bounce3"></div>
+	</div>
+</div></div>
+
+</div>
+
+{{#showNav}}
+<ul id="paging">
+	{{#prev}}
+	<li><a rel="prev" href="#/block/{{height}}/{{prev}}">prev page</a></li>
+	{{/prev}}
+	{{^prev}}
+	<li><a nohref>prev page</a></li>
+	{{/prev}}
+
+	{{#showNext}}
+	<li><a rel="next" href="#/block/{{height}}/{{next}}">next page</a></li>
+	{{/showNext}}
+	{{^showNext}}
+	<li><a nohref>next page</a></li>
+	{{/showNext}}
+
+</ul>
+{{/showNav}}
+

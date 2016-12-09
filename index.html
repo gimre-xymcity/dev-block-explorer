@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Catapult Blockchain explorer</title>
+		<!--<link href="//fonts.googleapis.com/css?family=Raleway:400,300,600|Ubuntu+Mono:400" rel="stylesheet" type="text/css">-->
+		<link rel="stylesheet" href="css/animation.css">
+		<link rel="stylesheet" href="css/normalize.css">
+		<link rel="stylesheet" href="css/skeleton.css">
+		<link rel="stylesheet" href="css/custom.css">
+		<link rel="stylesheet" href="css/nembex.css">
+	</head>
+	<body class=''>
+		<div class="container">
+			<div id="header" class="row">
+				<form id="searchForm">
+					<div class="six columns">
+						<h1 class='logo'><img src="img/mijin.png" alt='mijin' align='top'/> / catapult</h1>
+					</div>
+					<div class="four columns">
+						<!--
+						<label for="search">Search</label>
+						<input class="u-full-width" type="search" placeholder="" id="search">
+						-->
+					</div>
+					<div class="two columns">
+						<!--
+						<label for="execute">&nbsp;</label>
+						<input class="u-pull-right" type="submit" id="execute" value="Search" />
+						-->
+					</div>
+				</form>
+			</div>
+			<div class="row">
+				<div class="twelve columns"><strong>current chain height:</strong> <span id="chain-height"></span></div>
+
+			</div>
+			<div class="row">
+				<div class="twelve columns"><strong>tip:</strong> You can use arrows to navigate on pages with paging</div>
+			</div>
+		</div>
+
+		<div class="navbar-spacer"></div>
+		<nav class="navbar">
+		<div class="container">
+			<ul class="navbar-list">
+				<li class="navbar-item"><a class="navbar-link" href="#/blocks/0">Blocks</a></li>
+				<li class="navbar-item"><a class="navbar-link" href="#/unconfirmed/">Unconfirmed</a></li>
+				<li class="navbar-item"><a class="navbar-link" href="#/failed/">Failed</a></li>
+				<li class="navbar-item"><a class="navbar-link" href="#/statistics/from/0/to/0/grouping/60">Statistics</a></li> 
+			</ul>
+		</div>
+		</nav>
+		<div id="main" class="container">
+		</div>
+
+		<script type="text/javascript" src="js/charts/loader.js"></script>
+		<script src="js/base32.js" ></script>
+		<script src="js/CatapultFormat.js" ></script>
+		<script src="js/CatapultTypes.js" ></script>
+		<script src="js/jquery.min.js" ></script>
+		<script src="js/mustache.min.js" ></script>
+		<script src="js/sammy/sammy.js" ></script>
+		<script src="js/sammy/plugins/sammy.mustache.js" ></script>
+		<script src="js/catapult-chain-app.js" ></script>
+	</body>
+</html>

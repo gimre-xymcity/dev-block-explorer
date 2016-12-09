@@ -1,0 +1,29 @@
+<table id="blocks" class="u-full-width">
+  <thead>
+    <tr>
+      <th>Height</th>
+      <th>Timestamp</th>
+      <th>Harvester</th>
+      <th>#TXes</th>
+      <th>Fees</th>
+    </tr>
+  </thead>
+</table>
+
+{{#showNav}}
+<ul id="paging">
+	{{#prev}}
+	<li><a rel="prev" href="#/blocks/{{prev}}">prev page</a></li>
+	{{/prev}}
+	{{^prev}}
+	<li><a nohref>prev page</a></li>
+	{{/prev}}
+	
+	{{#next}}
+	<li><a rel="next" href="#/blocks/{{next}}">next page</a></li>
+	{{/next}}
+	{{^next}}
+	<li><a nohref>next page</a></li>
+	{{/next}}
+</ul>
+{{/showNav}}

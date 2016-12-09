@@ -1,0 +1,136 @@
+{{#meta.aggregateId}} <hr> <strong> {{/meta.aggregateId}}
+{{^meta.aggregateId}} <h5> {{/meta.aggregateId}}
+Transfer transaction
+{{#meta.aggregateId}} </strong> {{/meta.aggregateId}}
+{{^meta.aggregateId}} </h5> {{/meta.aggregateId}}
+
+
+{{^meta.aggregateId}}
+<div class="row">
+	<div class="three columns">
+		Block:
+	</div>
+	<div class="eight columns">
+		<a href="#/block/{{meta.height_str}}">{{meta.height_str}}</a>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Hash:
+	</div>
+	<div class="eight columns mono">
+		{{meta.hash}}
+	</div>
+</div>
+{{/meta.aggregateId}}
+
+<div class="row">
+	<div class="three columns">
+		Sender:
+	</div>
+	<div class="eight columns mono">
+		<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Recipient:
+	</div>
+	<div class="eight columns mono">
+		<a href="#/account/{{transaction.recipient}}/0">{{transaction.recipient_fmt}}</a>
+	</div>
+</div>
+
+{{! if there are any attachments amount is a multiplier, so we don't want to show it }}
+{{^transaction.mosaics}}
+<div class="row">
+	<div class="three columns">
+		Amount:
+	</div>
+	<div class="eight columns mono">
+		<strong>{{{amount_fmt}}}</strong>
+	</div>
+</div>
+{{/transaction.mosaics}}
+{{#transaction.mosaics.length}}
+<div class="row">
+	<div class="three columns">
+		Mosaics attached:
+	</div>
+	<div class="eight columns mono">
+		<strong>{{transaction.mosaics.length}}</strong>
+	</div>
+</div>
+{{/transaction.mosaics.length}}
+{{#transaction.mosaics}}
+<div class="row">
+	<div class="one column">&nbsp;
+	</div>
+	<div class="two columns">
+		Id:
+	</div>
+	<div class="eight columns mono">
+		{{{id_fmt}}}
+	</div>
+</div>
+<div class="row">
+	<div class="one column">&nbsp;
+	</div>
+	<div class="two columns">
+		Quantity:
+	</div>
+	<div class="eight columns mono">
+		{{{amount_fmt}}}
+	</div>
+</div>
+{{/transaction.mosaics}}
+
+{{^meta.aggregateId}}
+<div class="row">
+	<div class="three columns">
+		Fee:
+	</div>
+	<div class="eight columns mono">
+		{{{transaction.fee_fmt}}}
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Deadline:
+	</div>
+	<div class="eight columns mono">
+		{{{transaction.deadline_fmt}}}
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Signature:
+	</div>
+	<div class="eight columns mono">
+		<small>{{transaction.signature}}</small>
+	</div>
+</div>
+{{/meta.aggregateId}}
+
+
+<div class="row">
+	<div class="three columns">
+		Message:
+	</div>
+	<div class="one columns">
+		type: {{transaction.message.type}}
+	</div>
+	<div class="six columns mono">
+		<small class='icon-mail'> {{transaction.message.payload}} </small>
+		{{#transaction.message.is_encoded}}
+		<small class='icon-lock'>{{message_data}}</small>
+		{{/transaction.message.is_encoded}}
+	</div>
+</div>
+
+
+

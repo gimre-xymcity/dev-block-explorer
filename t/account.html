@@ -1,0 +1,80 @@
+
+	<div class="row">
+		<div class="three columns">
+			Address:
+		</div>
+		<div class="eight columns">
+			<strong>{{account.address_fmt}}</strong>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="three columns">
+			Public key:
+		</div>
+		<div class="eight columns">
+			{{account.publicKey}}
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="three columns">
+			Importance:
+		</div>
+		<div class="five columns textr">
+			{{{account.importance_fmt}}} <span class='dim'> * 10<sup>(-5)</sup></span>
+		</div>
+	</div>
+
+	<!--
+	<div class="row">
+		<div class="three columns">
+			Harvested blocks:
+		</div>
+		<div class="two columns">
+			{{raw.harvestedBlocks}} <span class='dim'>(nembex)</span>
+		</div>
+		<div class="three columns ">
+			{{account.harvestedBlocks}} <span class='dim'>(nem network)</span>
+		</div>
+	</div>
+	<div class="row">
+		<div class="three columns">
+			Harvested fees:
+		</div>
+		<div class="four columns textr">
+			{{{raw.balance.3_fmt}}} <span class='dim'>XEM</span>
+		</div>
+	</div>
+	-->
+<div>
+<h5>Owned mosaics</h5>
+<div id="account_mosaics">
+	{{#account.mosaics}}
+	<div class="row">
+		<div class="one column">&nbsp;
+		</div>
+		<div class="two columns">
+			Id:
+		</div>
+		<div class="eight columns mono">
+			{{{id_fmt}}}
+		</div>
+	</div>
+	<div class="row">
+		<div class="one column">&nbsp;
+		</div>
+		<div class="two columns">
+			Quantity:
+		</div>
+		<div class="eight columns mono">
+			{{{amount_fmt}}}
+		</div>
+	</div>
+	{{/account.mosaics}}
+</div>
+
+<h5>Recent transactions</h5>
+<div id="account_transactions" class="txlist">
+</div>
+</div>

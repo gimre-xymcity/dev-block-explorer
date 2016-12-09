@@ -1,0 +1,16 @@
+<tr class='data{{#className}} {{className}}{{/className}}'>
+<td class='mono'>
+	<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a> <br>
+	alias mosaic {{{transaction.mosaicId_fmt}}} -&gt; {{{transaction.namespaceId_fmt}}}
+</td>
+<td>{{meta.height_str}} </td>
+<td> {{{transaction.amount_fmt}}}
+	<br>fee: {{{transaction.fee_fmt}}} </td>
+<td>{{transaction.deadline_fmt}}</td>
+</tr>
+<tr class='txeshash'>
+<td class='mono' colspan=5>
+<span class='longdata'> {{transaction.hash_fmt}} </span>
+tx hash: <a href="#/aliasMosaic/{{meta.id}}">{{meta.hash}}</a>
+</td>
+</tr>
