@@ -28,7 +28,7 @@
 
 .sep { padding-left: 3px; }
 
-.longdata { 
+.longdata {
 	display: block;
 	width: 650px;
 	overflow: hidden;
@@ -66,7 +66,7 @@ td { padding: 2px; }
   position: absolute;
   top: 0;
   left: 0;
-  
+
   -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
   animation: sk-bounce 2.0s infinite ease-in-out;
 }
@@ -82,10 +82,10 @@ td { padding: 2px; }
 }
 
 @keyframes sk-bounce {
-  0%, 100% { 
+  0%, 100% {
     transform: scale(0.0);
     -webkit-transform: scale(0.0);
-  } 50% { 
+  } 50% {
     transform: scale(1.0);
     -webkit-transform: scale(1.0);
   }
@@ -124,13 +124,17 @@ td { padding: 2px; }
 }
 
 @keyframes sk-bouncedelay {
-  0%, 80%, 100% { 
+  0%, 80%, 100% {
     -webkit-transform: scale(0);
     transform: scale(0);
-  } 40% { 
+  } 40% {
     -webkit-transform: scale(1.0);
     transform: scale(1.0);
   }
+}
+
+.nonzero {
+	background-color: #f5f8f7;
 }
 
 .txlist h5 {
@@ -146,7 +150,7 @@ td { padding: 2px; }
 
 .txlist th,.txlist td { padding:2px; }
 
-ul#paging { 
+ul#paging {
 	list-style: none;
 	margin-top:10px;
 	padding-top: 6px;
@@ -159,7 +163,7 @@ ul#paging li {
 	position: relative;
 	border: 1px solid #c7c8c7;
 	border-radius: 2px;
-} 
+}
 
 ul#paging li + li {
 	margin-left: 10px;
@@ -237,7 +241,7 @@ ul#paging li a[nohref] { color: #c7c8c7; }
     -webkit-filter: drop-shadow(0 0 6px rgba(0,0,0,.1));
        -moz-filter: drop-shadow(0 0 6px rgba(0,0,0,.1));
             filter: drop-shadow(0 0 6px rgba(0,0,0,.1)); }
-  .popover-item:first-child .popover-link:after, 
+  .popover-item:first-child .popover-link:after,
   .popover-item:first-child .popover-link:before {
     bottom: 100%;
     left: 50%;

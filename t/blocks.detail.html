@@ -1,4 +1,7 @@
-<tr {{#className}}class='{{className}}'{{/className}}>
+<tr
+
+class='{{#meta.numTransactions}}nonzero{{/meta.numTransactions}} {{#className}}{{className}}{{/className}}'
+>
 <td><a href="#/block/{{block.height_str}}"><strong>{{{block.height_fmt}}}</strong></a></td>
 <td>{{block.timestamp_str}}</td>
 <td class='mono'><a href="#/account/{{block.signer}}/0">{{block.signer}}</a></td>

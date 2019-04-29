@@ -158,6 +158,8 @@
 				[TxType.AliasAddress]: templatesPrefix + '.alias.address.html',
 				[TxType.AliasMosaic]: templatesPrefix + '.alias.mosaic.html',
 				[TxType.AddressProperty]: templatesPrefix + '.property.address.html',
+				[TxType.MosaicProperty]: templatesPrefix + '.property.mosaic.html',
+				[TxType.TransactionTypeProperty]: templatesPrefix + '.property.transactionType.html',
 				[TxType.Transfer]: templatesPrefix + '.transfer.html',
 				[TxType.ModifyMultisigAccount]: templatesPrefix + '.multisig.html'
 			};
@@ -479,6 +481,8 @@
 		addSupport(this, 'aliasAddress');
 		addSupport(this, 'aliasMosaic');
 		addSupport(this, 'propertyAddress');
+		addSupport(this, 'propertyMosaic');
+		addSupport(this, 'propertyTransactionType');
 		addSupport(this, 'multisig');
 
 		this.get('#/aggregate/:txid', function(context) {

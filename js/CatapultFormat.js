@@ -22,6 +22,12 @@ var CatapultFormat = function(app) {
 	int2Hex: function(value) {
 		return ("0000000" + ((value|0)+4294967296).toString(16)).substr(-8);
 	},
+	int2ShortHex: function(value) {
+		return ("0000" + value.toString(16)).substr(-4);
+	},
+
+	// region low-level fmt functions
+
 	fmtUnbaseUtf8: function(key, data) {
 		if (!(key in data)) { return; }
 		var o = data[key].toString();
@@ -211,7 +217,7 @@ var CatapultFormat = function(app) {
 		if (data['message_type'] == 2) { data['enc'] = true; }
 		*/
 	},
-	fmtNemImportanceScore: function(key,data) {
+	fmtNemImportanceScore: function(key, data) {
 		if (!(key in data)) { return; }
 		var o = this.long2val(data[key]);
 		if (o) {
@@ -221,6 +227,50 @@ var CatapultFormat = function(app) {
 		}
 		data[key + '_fmt'] = o;
 	},
+	fmtPropertyModificationType: function (key, data) {
+		if (!(key in data)) { return; }
+		var mapping = {
+			0: 'Add',
+			1: 'Remove'
+		};
+		var value = mapping[data[key]];
+		data[key + '_str'] = value;
+		data[key + '_fmt'] = value;
+	},
+	fmtTransactionTypeName: function (key, data) {
+		if (!(key in data)) { return; }
+		const TxType = this.TxType;
+		var mapping = {
+			[TxType.AccountLink]: 'account link',
+			[TxType.AggregateComplete]: 'aggregate complete',
+			[TxType.AggregateBonded]: 'aggregate bonded',
+			[TxType.HashLock]: 'hash lock',
+			[TxType.SecretLock]: 'secret lock',
+			[TxType.SecretProof]: 'secret proof',
+			[TxType.MosaicDefinition]: 'mosaic definition',
+			[TxType.MosaicSupplyChange]: 'mosaic supply',
+			[TxType.RegisterNamespace]: 'register namespace',
+			[TxType.AliasAddress]: 'address alias',
+			[TxType.AliasMosaic]: 'mosaic alias',
+			[TxType.AddressProperty]: 'address property',
+			[TxType.MosaicProperty]: 'mosaic property',
+			[TxType.TransactionTypeProperty]: 'transaction type property',
+			[TxType.Transfer]: 'transfer property',
+			[TxType.ModifyMultisigAccount]: 'modify multisig account'
+		};
+		const value = data[key];
+		var valueName = 'unknown transaction type';
+		if (value in mapping)
+			valueName = mapping[value];
+
+		data[key + '_str'] = valueName;
+		data[key + '_fmt'] = valueName + " <span class='dim'>(0x" + this.int2ShortHex(value) + ")</span>";
+	},
+
+	// endformat
+
+	// region high-level format functions
+
 	formatAccount: function(item) {
 		this.fmtCatapultAddress('address', item.account);
 		this.fmtCatapultPublicKey('publicKey', item.account);
@@ -301,6 +351,29 @@ var CatapultFormat = function(app) {
 	},
 	formatAddressProperty: function(i, item) {
 		this.fmtPropertyType('propertyType', item.transaction);
+		var self = this;
+		$.each(item.transaction.modifications, function(j, at){
+			self.fmtPropertyModificationType('type', at);
+			self.fmtCatapultAddress('value', at);
+		});
+	},
+	formatMosaicProperty: function(i, item) {
+		this.fmtPropertyType('propertyType', item.transaction);
+		console.log('mosaic property', item.transaction);
+		var self = this;
+		$.each(item.transaction.modifications, function(j, at){
+			self.fmtPropertyModificationType('type', at);
+			self.fmtMosaicId('value', at);
+		});
+	},
+	formatTransactionTypeProperty: function(i, item) {
+		this.fmtPropertyType('propertyType', item.transaction);
+		console.log('transaction type property', item.transaction);
+		var self = this;
+		$.each(item.transaction.modifications, function(j, at){
+			self.fmtPropertyModificationType('type', at);
+			self.fmtTransactionTypeName('value', at);
+		});
 	},
 	formatTransaction: function(i, item, epochTimestamp) {
 		this.fmtCatapultHeight('height', item.meta);
@@ -322,6 +395,8 @@ var CatapultFormat = function(app) {
 			[TxType.AliasAddress]: this.formatAliasAddressTransaction,
 			[TxType.AliasMosaic]: this.formatAliasMosaicTransaction,
 			[TxType.AddressProperty]: this.formatAddressProperty,
+			[TxType.MosaicProperty]: this.formatMosaicProperty,
+			[TxType.TransactionTypeProperty]: this.formatTransactionTypeProperty,
 			[TxType.Transfer]: this.formatTransferTransaction,
 			[TxType.ModifyMultisigAccount]: this.formatMultisigTransaction
 		};
@@ -350,4 +425,6 @@ var CatapultFormat = function(app) {
 	*/
 	//var nemEpoch = Date.UTC(2015, 2, 29, 0, 6, 25, 0)
 	});
+
+	// endregion
 };
