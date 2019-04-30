@@ -169,6 +169,7 @@
 				var type = tx.transaction.type;
 				if (!(type in txTemplateMap))
 					throw ('template not found t/short.(' + context.int2Hex(type) + ')');
+
 				return fun(context.render(txTemplateMap[type], tx));
 			};
 		}
@@ -394,7 +395,11 @@
 			if (isNaN(blockHeight)) {
 				return;
 			}
+
 			var txId = params['id'];
+			var options = { pageSize: 100 };
+			if (txId)
+				options.id = txId;
 
 			getJson(`/block/${blockHeight}`)
 			.then(item => {
@@ -404,12 +409,9 @@
 				context.fmtCatapultDifficulty('difficulty', item.block);
 				context.fmtCatapultValue('totalFee', item.meta);
 
-				context.render('t/block.details.html',item)
+				context.render('t/block.details.html', item)
 					.appendTo(context.$element());
 
-				var options = { pageSize: 100 };
-				if (txId)
-					options.id = txId;
 
 				return getJson(`/block/${blockHeight}/transactions`, options);
 			})
