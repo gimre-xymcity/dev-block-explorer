@@ -74,9 +74,7 @@
 		var host = location.hostname;
 		var apiHost = 'http://' + host + ':3000';
 		var wsHost = 'ws://' + host + ':3000/ws';
-		var getJson = function(a, b, c) {
-			$.getJSON(apiHost + a, b, c);
-		};
+		var getJson = (a, b) => $.getJSON(apiHost + a, b);
 
 		var wsConnection = new WebSocket(wsHost);
 		wsConnection.onopen = function () {
@@ -302,43 +300,45 @@
 				return;
 			}
 
-			getJson('/chain/height', function(chainHeightObj) {
+			getJson('/chain/height')
+			.then(chainHeightObj => {
 				var chainHeight = array2number(chainHeightObj.height);
 				var queryHeight = blockHeight;
 				if (0 === queryHeight)
 					queryHeight = alignDown(chainHeight, 100);
 
-				getJson(`/blocks/${queryHeight}/limit/100`, function(items) {
-					$.each(items, function(i, item) {
-						context.formatBlock(i, item, epochTimestamp);
-					});
-					var h = parseInt(items[items.length - 1].block.height, 10);
-
-					var data = {};
-					if (items.length == 100) { data['next'] = h + 100; }
-					if (h > 100) { data['prev'] = h - 100; }
-
-					data['showNav']=true;
-					context.partial('t/blocks.html', data)
-						.renderEach('t/blocks.detail.html', items)
-						.appendTo('#blocks');
-
-					if (0 !== blockHeight) {
-						setDefaultBlockHandler(context);
-					} else {
-						blockHandler = function handler(obj) {
-							var obj = defaultBlockHandler(context, obj);
-							obj.className='newRow';
-							context.render('t/blocks.detail.html', obj)
-								.prependTo('#blocks > tbody').then(function() {
-									var body = $('#blocks > tbody')[0];
-									while (body.rows.length > 100)
-										$('#blocks')[0].deleteRow($('#blocks')[0].rows.length - 1);
-								});
-						};
-					}
-				});
+				return getJson(`/blocks/${queryHeight}/limit/100`);
 			})
+			.then(items => {
+				$.each(items, function(i, item) {
+					context.formatBlock(i, item, epochTimestamp);
+				});
+				var h = parseInt(items[items.length - 1].block.height, 10);
+
+				var data = {};
+				if (items.length == 100) { data['next'] = h + 100; }
+				if (h > 100) { data['prev'] = h - 100; }
+
+				data['showNav']=true;
+				context.partial('t/blocks.html', data)
+					.renderEach('t/blocks.detail.html', items)
+					.appendTo('#blocks');
+
+				if (0 !== blockHeight) {
+					setDefaultBlockHandler(context);
+				} else {
+					blockHandler = function handler(obj) {
+						var obj = defaultBlockHandler(context, obj);
+						obj.className='newRow';
+						context.render('t/blocks.detail.html', obj)
+							.prependTo('#blocks > tbody').then(function() {
+								var body = $('#blocks > tbody')[0];
+								while (body.rows.length > 100)
+									$('#blocks')[0].deleteRow($('#blocks')[0].rows.length - 1);
+							});
+					};
+				}
+			});
 		});
 
 
@@ -396,12 +396,14 @@
 			}
 			var txId = params['id'];
 
-			getJson(`/block/${blockHeight}`, function(item) {
+			getJson(`/block/${blockHeight}`)
+			.then(item => {
 				context.fmtCatapultHeight('height', item.block);
 				context.fmtCatapultPublicKey('signer', item.block);
 				context.fmtTimestamp('timestamp', item.block, epochTimestamp);
 				context.fmtCatapultDifficulty('difficulty', item.block);
 				context.fmtCatapultValue('totalFee', item.meta);
+
 				context.render('t/block.details.html',item)
 					.appendTo(context.$element());
 
@@ -409,18 +411,19 @@
 				if (txId)
 					options.id = txId;
 
-				getJson('/block/' + blockHeight + '/transactions', options, function(transactions) {
-					var txes = { transfers: transactions };
-					txes['showNav'] = true;
-					if (transactions.length > 0) {
-						txes['showNext'] = true;
-						var meta = transactions[transactions.length - 1].meta;
-						txes['next'] = meta.id;
-						txes['height'] = meta.height;
-					}
+				return getJson(`/block/${blockHeight}/transactions`, options);
+			})
+			.then(transactions => {
+				var txes = { transfers: transactions };
+				txes['showNav'] = true;
+				if (transactions.length > 0) {
+					txes['showNext'] = true;
+					var meta = transactions[transactions.length - 1].meta;
+					txes['next'] = meta.id;
+					txes['height'] = meta.height;
+				}
 
-					renderTxes(context, '#block_transactions', 'Block transactions', txes, function(cbs) {
-					});
+				renderTxes(context, '#block_transactions', 'Block transactions', txes, function(cbs) {
 				});
 			});
 		}
@@ -444,9 +447,10 @@
 				return;
 			}
 
-			getJson(`/transaction/${txid}`, function(items) {
+			getJson(`/transaction/${txid}`)
+			.then(items => {
 				context.formatTransaction(0, items, epochTimestamp);
-				context.render('t/s.transfer.html',items)
+				context.render('t/s.transfer.html', items)
 					.appendTo(context.$element());
 			});
 		});
@@ -454,7 +458,6 @@
 		// show a single tx
 		function addSupport(self, txName) {
 			var uri = '#/' + txName + '/:txid';
-			console.log('adding', uri)
 			self.get(uri, function(context) {
 				context.app.swap('');
 				setActiveLink('transactions', context);
@@ -463,7 +466,8 @@
 					return;
 				}
 
-				getJson(`/transaction/${txid}`, function(items) {
+				getJson(`/transaction/${txid}`)
+				.then(items => {
 					context.formatTransaction(0, items, epochTimestamp);
 					context.render('t/s.' + txName + '.html',items)
 						.appendTo(context.$element());
@@ -493,7 +497,8 @@
 				return;
 			}
 
-			getJson(`/transaction/${txid}`, function(items) {
+			getJson(`/transaction/${txid}`)
+			.then(items => {
 				context.formatTransaction(0, items, epochTimestamp);
 				context.render('t/s.aggregate.html',items)
 					.appendTo(context.$element());
@@ -531,38 +536,41 @@
 			if (24 != txId.length)
 				txId = '0';
 
-			getJson(`/account/${accountId}`, function(item) {
+			var transactionsOptions = {
+				pageSize: 10
+			};
+
+			if (24 == txId.length) {
+				transactionsOptions.id = txId;
+			}
+
+			getJson(`/account/${accountId}`)
+			.then(item => {
 				context.formatAccount(item);
 				context.render('t/account.html', item)
 					.appendTo(context.$element());
 
-				var options = {
-					pageSize: 10
-				};
+				this.publicKey = item.account.publicKey;
+				return getJson(`/account/${this.publicKey}/transactions`, transactionsOptions)
+			})
+			.then(transactions => {
+				var txes = {};
+				txes['transfers'] = transactions;
+				var publicKey = this.publicKey;
 
-				if (24 == txId.length) {
-					options.id = txId;
-				}
+				renderTxes(context, '#account_transactions', 'Account transactions', txes, function(cbs){
+					cbs.push(function() {
+						// make paging avail for the account data
+						if (transactions.length == transactionsOptions.pageSize) {
+							txes['showPrev'] = true;
+							txes['prev'] = transactions[transactions.length - 1].meta.id;
+						}
 
-				var publicKey = item.account.publicKey;
-				getJson(`/account/${publicKey}/transactions`, options, function(transactions) {
-					var txes = {};
-					txes['transfers'] = transactions;
+						txes['addr'] = publicKey;
+						txes['showNav'] = true;
 
-					renderTxes(context, '#account_transactions', 'Account transactions', txes, function(cbs){
-						cbs.push(function() {
-							// make paging avail for the account data
-							if (transactions.length == options.pageSize) {
-								txes['showPrev'] = true;
-								txes['prev'] = transactions[transactions.length - 1].meta.id;
-							}
-
-							txes['addr'] = publicKey;
-							txes['showNav'] = true;
-
-							return context.render('t/account.detail.html', txes)
-								.appendTo('#account_transactions')
-						});
+						return context.render('t/account.detail.html', txes)
+							.appendTo('#account_transactions')
 					});
 				});
 			});
