@@ -1,7 +1,8 @@
 <tr class='data{{#className}} {{className}}{{/className}}'>
 <td class='mono'>
 	<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a> <br>
-	aggregate transaction with #{{transaction.cosignatures.length}} signatures
+	#mods {{transaction.modifications.length}},
+	min delta: approval {{transaction.minApprovalDelta}}, removal {{transaction.minRemovalDelta}}
 </td>
 <td>{{meta.height_str}} </td>
 <td>
@@ -10,6 +11,6 @@
 </tr>
 <tr class='txeshash'>
 <td class='mono' colspan=5>
-tx hash: <a href="#/aggregate/{{meta.id}}">{{meta.hash}}</a>
+tx hash: <a href="#/multisig/{{meta.id}}">{{meta.hash}}</a>
 </td>
 </tr>

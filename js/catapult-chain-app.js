@@ -141,95 +141,138 @@
 			setDefaultBlockHandler(context);
 		}
 
-		function createTemplateMap(TxType, prefix) {
+		function createTransactionTemplateMap(context, prefix) {
 			var templatesPrefix = 't/' + prefix;
-			return {
-				[TxType.AccountLink]: templatesPrefix + '.account.link.html',
-				[TxType.AggregateComplete]: templatesPrefix + '.aggregate.html',
-				[TxType.AggregateBonded]: templatesPrefix + '.aggregate.html',
-				[TxType.HashLock]: templatesPrefix + '.hashlock.html',
-				[TxType.SecretLock]: templatesPrefix + '.secretlock.html',
-				[TxType.SecretProof]: templatesPrefix + '.secretproof.html',
-				[TxType.MosaicDefinition]: templatesPrefix + '.mosaic.html',
-				[TxType.MosaicSupplyChange]: templatesPrefix + '.mosaic.supply.html',
-				[TxType.RegisterNamespace]: templatesPrefix + '.namespace.html',
-				[TxType.AliasAddress]: templatesPrefix + '.alias.address.html',
-				[TxType.AliasMosaic]: templatesPrefix + '.alias.mosaic.html',
-				[TxType.AddressProperty]: templatesPrefix + '.property.address.html',
-				[TxType.MosaicProperty]: templatesPrefix + '.property.mosaic.html',
-				[TxType.TransactionTypeProperty]: templatesPrefix + '.property.transactionType.html',
-				[TxType.Transfer]: templatesPrefix + '.transfer.html',
-				[TxType.ModifyMultisigAccount]: templatesPrefix + '.multisig.html'
+			var templates = {
+				[context.TxType.AggregateComplete]: templatesPrefix + '.aggregate.html',
+				[context.TxType.AggregateBonded]: templatesPrefix + '.aggregate.html'
 			};
+
+			for ([key, value] of Object.entries(context.TxDirectoryNames))
+				templates[key] = `t/${value}/${prefix}.html`;
+
+			return templates;
 		}
 
-		function createTxRenderer(context, tx, fun) {
-			var txTemplateMap = createTemplateMap(context.TxType, 'short');
+		function createTxRenderer(context, tx, txTemplateMap, fun) {
 			return function() {
 				var type = tx.transaction.type;
 				if (!(type in txTemplateMap))
-					throw ('template not found t/short.(' + context.int2Hex(type) + ')');
+					throw ('template for tx type (' + context.int2Hex(type) + ') not found');
 
 				return fun(context.render(txTemplateMap[type], tx));
 			};
 		}
 
+		function createReceiptRenderer(context, receipt, fun) {
+			return function() {
+				const basicReceiptType = context.ReceiptTypeToBasicReceiptType(receipt.type);
+				const filename = context.BasicReceiptFileNames[basicReceiptType];
+
+				return fun(context.render(`t/receipts/${filename}.html`, receipt));
+			};
+		}
+
+		function  chainRenderers(renders) {
+			(function instantiateRenderer() {
+				if (renders.length)
+					renders.shift().call().then(instantiateRenderer);
+			})();
+		}
+
+		function createResolver(resolutionStatements) {
+			var mapping = resolutionStatements.reduce((map, resolution) => {
+				map[resolution.unresolved] = resolution.resolutionEntries;
+				return map;
+			}, {});
+
+			return id => {
+				if (id in mapping)
+					return mapping[id];
+
+				return id;
+			};
+		}
+
+		function createResolvers(receipts) {
+			return {
+				mosaic: createResolver(receipts['mosaicResolutionStatements']),
+				address: createResolver(receipts['addressResolutionStatements'])
+			}
+		}
+
+		var prepareReceiptsRenderers = function(context, divName, statement, output) {
+			$.each(statement['receipts'], (i, item) => context.formatReceipt(i, item));
+
+			var cbs = output || [];
+			cbs.push(() => context.render('t/receipts.html', statement).replace(divName));
+			$.each(statement['receipts'], (i, receipt) =>
+				cbs.push(createReceiptRenderer(context, receipt, renderer => renderer.appendTo('.receipts_list:last')))
+			);
+
+			return cbs;
+		}
+
 		// This is common for pages that display multiple txes
 		// (/block/ page, /account/ page, /search/ page)
-		var renderTxes = function(context, divName, header, txes, cb) {
-			var cbs = [];
-			$.each(txes['transfers'], function(i,item){ context.formatTransaction(i, item, epochTimestamp); });
+		var prepareTxesRenderers = function(context, divName, header, txes) {
+			// format transactions and add receipts
+			if ('receipts' in txes)
+				context.aliasResolvers = createResolvers(txes['receipts']);
+
+			$.each(txes['transfers'], function(i, item) {
+				context.formatTransaction(i, item, epochTimestamp);
+				item.receipts = [];
+			});
 			txes.header = header;
 
-			cbs.push(function() {
-				return context.render('t/transactions.html', txes)
-					.replace(divName);
-			});
+			if ('receipts' in txes) {
+				$.each(txes['receipts']['transactionStatements'], function(i, item) {
+					// skip block statements
+					if (0 === item.source.primaryId)
+						return;
+
+					txes['transfers'][item.source.primaryId - 1].receipts = item['receipts'];
+				});
+			}
+
+			// each renderer yields a promise, so they need to be stored and chained together, to render in proper order.
+			var templateMap = createTransactionTemplateMap(context, 'short');
+			var cbs = [];
+			cbs.push(() => context.render('t/transactions.html', txes).replace(divName));
 			$.each(txes['transfers'], function(i, tx) {
-				cbs.push(createTxRenderer(context, tx, function(renderer) {
-					return renderer.appendTo('#datarows');
-				}));
+				cbs.push(createTxRenderer(context, tx, templateMap, renderer => renderer.appendTo('#datarows')));
 			});
-			cbs.push(function() {
-				return context.load($('#empty')).replace('#animation');
-			})
+			cbs.push(() => context.load($('#empty')).replace('#animation'));
 
-			cb(cbs);
-
-			// call funcs in order
-			(function foo() {
-				if (cbs.length) {
-					cbs.shift().call().then(foo);
-				}
-			})();
+			return cbs;
 		};
 
-		var renderFullTxes = function(context, divName, txes, cb) {
-			var cbs = [];
-			$.each(txes['transfers'], function(i,item){ context.formatTransaction(i, item, epochTimestamp); });
-
-			cbs.push(function() {
-				return context.render('t/transactions.full.html', txes)
-					.replace(divName);
+		var prepareFullTxesRenderers = function(context, divName, txes, primaryIndex) {
+			$.each(txes['transfers'], (i, item) => {
+				console.log(item);
+				context.formatTransaction(i, item, epochTimestamp)
+				item.receipts = [];
 			});
-			var templateMap = createTemplateMap(context.TxType, 's');
-			$.each(txes['transfers'], function(i, tx) {
-				cbs.push(function() {
-					return context.render(templateMap[tx.transaction.type], tx).appendTo('#aggregate_transactions');
+
+			if ('receipts' in txes) {
+				$.each(txes['receipts']['transactionStatements'], function(i, item) {
+					if (primaryIndex + 1 === item.source.primaryId && 0 < item.source.secondaryId) {
+						txes['transfers'][item.source.secondaryId - 1].receipts = item['receipts'];
+					}
 				});
+			}
+
+			var cbs = [];
+			cbs.push(() => context.render('t/transactions.full.html', txes).replace(divName));
+			var templateMap = createTransactionTemplateMap(context, 'full');
+			$.each(txes['transfers'], (i, tx) => {
+				cbs.push(createTxRenderer(context, tx, templateMap, renderer => renderer.appendTo('#aggregate_transactions')))
+				prepareReceiptsRenderers(context, '.transaction_receipts_placeholder:last', tx, cbs);
 			});
-			cbs.push(function() {
-				return context.load($('#empty')).replace('#animation');
-			})
+			cbs.push(() => context.load($('#empty')).replace('#animation'));
 
-			cb(cbs);
-
-			// call funcs in order
-			(function foo() {
-				if (cbs.length) {
-					cbs.shift().call().then(foo);
-				}
-			})();
+			return cbs;
 		};
 
 		$("#searchForm").submit(function(event) {
@@ -358,10 +401,10 @@
 				if (!(obj.meta.hash in allUts)) {
 					allUts[obj.meta.hash] = obj;
 					var txes = { transfers: [ obj ] };
-					context.formatTransaction(Object.keys(allUts).legth, obj, epochTimestamp);
-					(createTxRenderer(context, obj, function(renderer) {
-						renderer.prependTo('#datarows')
-					}))();
+					context.formatTransaction(Object.keys(allUts).length, obj, epochTimestamp);
+
+					var templateMap = createTransactionTemplateMap(context, 'short');
+					(createTxRenderer(context, obj, templateMap, renderer => renderer.prependTo('#datarows')))();
 				}
 			};
 		});
@@ -403,20 +446,25 @@
 
 			getJson(`/block/${blockHeight}`)
 			.then(item => {
-				context.fmtCatapultHeight('height', item.block);
-				context.fmtCatapultPublicKey('signer', item.block);
-				context.fmtTimestamp('timestamp', item.block, epochTimestamp);
+				// todo: move to format block?
 				context.fmtCatapultDifficulty('difficulty', item.block);
-				context.fmtCatapultValue('totalFee', item.meta);
-
+				context.formatBlock(0, item, epochTimestamp);
 				context.render('t/block.details.html', item)
 					.appendTo(context.$element());
 
+				return getJson(`/block/${blockHeight}/receipts`);
+			})
+			.then(receipts => {
+				this.receipts = receipts;
+				var statements = receipts["transactionStatements"]
+				var blockStatement = 0 == statements.length ? null : statements[0];
 
+				chainRenderers(prepareReceiptsRenderers(context, '#block_receipts_placeholder', blockStatement));
 				return getJson(`/block/${blockHeight}/transactions`, options);
 			})
 			.then(transactions => {
-				var txes = { transfers: transactions };
+				var txes = { transfers: transactions, receipts: this.receipts };
+
 				txes['showNav'] = true;
 				if (transactions.length > 0) {
 					txes['showNext'] = true;
@@ -425,8 +473,7 @@
 					txes['height'] = meta.height;
 				}
 
-				renderTxes(context, '#block_transactions', 'Block transactions', txes, function(cbs) {
-				});
+				chainRenderers(prepareTxesRenderers(context, '#block_transactions', 'Block transactions', txes));
 			});
 		}
 
@@ -439,27 +486,14 @@
 			displayBlock(this.params, context);
 		});
 
-		// show a single tx
-		this.get('#/transfer/:txid', function(context) {
-			context.app.swap('');
-			setActiveLink('transactions', context);
-
-			var txid = context.unfmtHash(this.params.txid);
-			if (txid.length != 24) {
-				return;
-			}
-
-			getJson(`/transaction/${txid}`)
-			.then(items => {
-				context.formatTransaction(0, items, epochTimestamp);
-				context.render('t/s.transfer.html', items)
-					.appendTo(context.$element());
-			});
-		});
+		function findFirstTransactionStatement(statements, index, secondary) {
+			return statements.find(statement => index + 1 == statement.source.primaryId && secondary == statement.source.secondaryId);
+		}
 
 		// show a single tx
-		function addSupport(self, txName) {
+		function addTransactionSupport(self, txName) {
 			var uri = '#/' + txName + '/:txid';
+			console.log(`adding ${uri} handler`);
 			self.get(uri, function(context) {
 				context.app.swap('');
 				setActiveLink('transactions', context);
@@ -469,27 +503,36 @@
 				}
 
 				getJson(`/transaction/${txid}`)
-				.then(items => {
-					context.formatTransaction(0, items, epochTimestamp);
-					context.render('t/s.' + txName + '.html',items)
-						.appendTo(context.$element());
-				});
+				.then(item => {
+					this.transaction = item;
+					context.fmtCatapultHeight('height', item.meta);
+					return getJson(`/block/${item.meta.height_str}/receipts`);
+				})
+				.then(receipts => {
+					context.aliasResolvers = createResolvers(receipts);
+					context.formatTransaction(0, this.transaction, epochTimestamp);
+					var transactionRenderer = () =>
+						context.render('t/' + txName + '/full.html', this.transaction)
+							.appendTo(context.$element());
+
+					var statements = receipts["transactionStatements"]
+					var transactionStatement = findFirstTransactionStatement(statements, this.transaction.meta.index, 0);
+					if (!transactionStatement) {
+						transactionRenderer();
+						return;
+					}
+
+					// prepending transactionRenderer here to make sure it is chained with further renderers
+					const receiptRenderers = prepareReceiptsRenderers(context, '.transaction_receipts_placeholder:first', transactionStatement);
+					receiptRenderers.unshift(transactionRenderer);
+					chainRenderers(receiptRenderers);
+				})
 			});
 		}
 
-		addSupport(this, 'accountLink');
-		addSupport(this, 'hashlock');
-		addSupport(this, 'secretlock');
-		addSupport(this, 'secretproof');
-		addSupport(this, 'mosaic');
-		addSupport(this, 'mosaicSupply');
-		addSupport(this, 'namespace');
-		addSupport(this, 'aliasAddress');
-		addSupport(this, 'aliasMosaic');
-		addSupport(this, 'propertyAddress');
-		addSupport(this, 'propertyMosaic');
-		addSupport(this, 'propertyTransactionType');
-		addSupport(this, 'multisig');
+		// add all transaction pages
+		for (transactionName of Object.values(this.context_prototype.prototype.TxDirectoryNames))
+			addTransactionSupport(this, transactionName);
 
 		this.get('#/aggregate/:txid', function(context) {
 			context.app.swap('');
@@ -500,23 +543,34 @@
 			}
 
 			getJson(`/transaction/${txid}`)
-			.then(items => {
-				context.formatTransaction(0, items, epochTimestamp);
-				context.render('t/s.aggregate.html',items)
-					.appendTo(context.$element());
+			.then(item => {
+				this.aggregate = item;
+				context.fmtCatapultHeight('height', item.meta);
+				return getJson(`/block/${item.meta.height_str}/receipts`);
+			})
+			.then(receipts => {
+				const item = this.transaction;
+				context.aliasResolvers = createResolvers(receipts);
+				context.formatTransaction(0, this.aggregate, epochTimestamp);
 
-				var txes = { transfers: items.transaction.transactions };
-				/*
-				txes['showNav'] = true;
-				if (transactions.length > 0) {
-					txes['showNext'] = true;
-					var meta = transactions[transactions.length - 1].meta;
-					txes['next'] = meta.id;
-					txes['height'] = meta.height;
-				}*/
+				var txes = { transfers: this.aggregate.transaction.transactions, receipts: receipts };
+				var primaryIndex = this.aggregate.meta.index;
+				const txesRenderers = prepareFullTxesRenderers(context, '#aggregate_transactions', txes, primaryIndex);
 
-				renderFullTxes(context, '#aggregate_transactions', txes, function(cbs) {
-				});
+				// prepend main renderer
+				txesRenderers.unshift(() =>
+					context.render('t/full.aggregate.html', this.aggregate)
+						.appendTo(context.$element()));
+
+				var statements = receipts["transactionStatements"]
+				var transactionStatement = findFirstTransactionStatement(statements, primaryIndex, 0);
+				if (!transactionStatement) {
+					chainRenderers(txesRenderers)
+					return;
+				}
+
+				const receiptRenders = prepareReceiptsRenderers(context, '#aggregate_receipts_placeholder', transactionStatement);
+				chainRenderers(txesRenderers.concat(receiptRenders));
 			});
 		});
 
@@ -559,22 +613,22 @@
 				var txes = {};
 				txes['transfers'] = transactions;
 				var publicKey = this.publicKey;
+				const renderers = prepareTxesRenderers(context, '#account_transactions', 'Account transactions', txes);
+				renderers.push(function() {
+					// make paging avail for the account data
+					if (transactions.length == transactionsOptions.pageSize) {
+						txes['showPrev'] = true;
+						txes['prev'] = transactions[transactions.length - 1].meta.id;
+					}
 
-				renderTxes(context, '#account_transactions', 'Account transactions', txes, function(cbs){
-					cbs.push(function() {
-						// make paging avail for the account data
-						if (transactions.length == transactionsOptions.pageSize) {
-							txes['showPrev'] = true;
-							txes['prev'] = transactions[transactions.length - 1].meta.id;
-						}
+					txes['addr'] = publicKey;
+					txes['showNav'] = true;
 
-						txes['addr'] = publicKey;
-						txes['showNav'] = true;
-
-						return context.render('t/account.detail.html', txes)
-							.appendTo('#account_transactions')
-					});
+					return context.render('t/account.detail.html', txes)
+						.appendTo('#account_transactions')
 				});
+
+				chainRenderers(renderers);
 			});
 		});
 

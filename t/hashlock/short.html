@@ -1,15 +1,17 @@
 <tr class='data{{#className}} {{className}}{{/className}}'>
 <td class='mono'>
 	<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a> <br>
-	aggregate transaction with #{{transaction.cosignatures.length}} signatures
+	<b>hash</b> lock, duration: {{transaction.duration_fmt}}
 </td>
 <td>{{meta.height_str}} </td>
-<td>
+<td> {{{transaction.amount_fmt}}}
 	<br>#receipts: {{receipts.length}} </td>
 <td>{{transaction.deadline_fmt}}</td>
 </tr>
 <tr class='txeshash'>
 <td class='mono' colspan=5>
-tx hash: <a href="#/aggregate/{{meta.id}}">{{meta.hash}}</a>
+<span class='longdata'> {{transaction.hash_fmt}} </span>
+tx hash: <a href="#/hashlock/{{meta.id}}">{{meta.hash}}</a>
 </td>
 </tr>
+

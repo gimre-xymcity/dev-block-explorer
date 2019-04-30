@@ -78,12 +78,41 @@ var CatapultFormat = function(app) {
 		if (!(key in data)) { return; }
 		this.fmtCatapultId(key, data);
 
-		if (data[key][1] === 0x941299b2 && data[key][0] === 0xb7e1291c) {
-			data[key + '_str'] += " (cat.harvest)";
-			data[key + '_fmt'] += " (cat.harvest)";
-		} else if (data[key][1] === 0x85bbea6c && data[key][0] === 0xc462b244) {
-			data[key + '_str'] += " (cat.currency)";
-			data[key + '_fmt'] += " (cat.currency)";
+		var mosaicId = data[key];
+		if (this.aliasResolvers) {
+			var resolutions = this.aliasResolvers.mosaic(mosaicId);
+			if (resolutions !== mosaicId) {
+				data[key + '_orig'] = data[key];
+				data[key + '_str_orig'] = data[key + '_str'];
+				data[key + '_fmt_orig'] = data[key + '_fmt']
+
+				// todo: figure out how to handle multiple resolutions...
+				mosaicId = resolutions[0].resolved;
+				data[key] = mosaicId;
+				this.fmtCatapultId(key, data);
+			}
+		}
+
+		var name = '';
+		if (mosaicId[1] === 0x941299b2 && mosaicId[0] === 0xb7e1291c) {
+			name = 'cat.harvest';
+		} else if (mosaicId[1] === 0x85bbea6c && mosaicId[0] === 0xc462b244) {
+			name = 'cat.currency;'
+		} else if (mosaicId[1] === 0x26514E2A&& mosaicId[0] === 0x1EF33824) {
+			name = 'RAW cat.harvest';
+		} else if (mosaicId[1] === 0x0DC67FBE && mosaicId[0] === 0x1CAD29E3) {
+			name = 'RAW cat.currency';
+		}
+
+		if (name) {
+			var current = data[key + '_str'];
+			data[key + '_str'] = `${name} <span class='dim'>(${current})</span>`;
+			current = data[key + '_fmt'];
+			data[key + '_fmt'] = `${name} <span class='dim'>(${current})</span>`;
+		}
+
+		if ((key + '_orig') in data) {
+			data[key + '_alias_fmt'] = data[key + 'fmt_orig'];
 		}
 	},
 	fmtMosaicNonce: function(key, data) {
@@ -189,9 +218,36 @@ var CatapultFormat = function(app) {
 		if (data===null || !(key in data)) { return; }
 		data[key + '_fmt'] = data[key].match(/.{1,6}/g).join('-');
 	},
-	fmtCatapultAddress: function(key, data) {
+	fmtCatapultAddressImpl: function(key, data) {
 		if (data===null || !(key in data)) { return; }
 		data[key + '_fmt'] = base32.encode(this.hex2a(data[key])).match(/.{1,6}/g).join('-');
+	},
+	fmtCatapultAddress: function(key, data) {
+		this.fmtCatapultAddressImpl(key, data);
+
+		var address = data[key];
+		if (this.aliasResolvers) {
+			var resolutions = this.aliasResolvers.address(address);
+			if (resolutions !== address) {
+				data[key + '_orig'] = data[key];
+				data[key + '_fmt_orig'] = data[key + '_fmt']
+
+				// todo: figure out how to handle multiple resolutions...
+				address = resolutions[0].resolved;
+				data[key] = address;
+				this.fmtCatapultAddressImpl(key, data);
+			}
+		}
+
+		if ((key + '_orig') in data) {
+			const unresolved = data[key + '_orig'];
+			var loStr = unresolved.substr(8, 2) + unresolved.substr(6, 2) + unresolved.substr(4, 2) + unresolved.substr(2, 2);
+			var hiStr = unresolved.substr(16, 2) + unresolved.substr(14, 2) + unresolved.substr(12, 2) + unresolved.substr(10, 2);
+			var hi = parseInt(hiStr, 16);
+			var lo = parseInt(loStr, 16);
+			data[key + '_alias'] = [lo, hi];
+			this.fmtCatapultId(key + '_alias', data);
+		}
 	},
 	unfmtCatapultPublicKey: function(data) {
 		return data.replace(/[^a-zA-Z2-7]/g, "").toUpperCase();
@@ -239,37 +295,19 @@ var CatapultFormat = function(app) {
 	},
 	fmtTransactionTypeName: function (key, data) {
 		if (!(key in data)) { return; }
-		const TxType = this.TxType;
-		var mapping = {
-			[TxType.AccountLink]: 'account link',
-			[TxType.AggregateComplete]: 'aggregate complete',
-			[TxType.AggregateBonded]: 'aggregate bonded',
-			[TxType.HashLock]: 'hash lock',
-			[TxType.SecretLock]: 'secret lock',
-			[TxType.SecretProof]: 'secret proof',
-			[TxType.MosaicDefinition]: 'mosaic definition',
-			[TxType.MosaicSupplyChange]: 'mosaic supply',
-			[TxType.RegisterNamespace]: 'register namespace',
-			[TxType.AliasAddress]: 'address alias',
-			[TxType.AliasMosaic]: 'mosaic alias',
-			[TxType.AddressProperty]: 'address property',
-			[TxType.MosaicProperty]: 'mosaic property',
-			[TxType.TransactionTypeProperty]: 'transaction type property',
-			[TxType.Transfer]: 'transfer property',
-			[TxType.ModifyMultisigAccount]: 'modify multisig account'
-		};
+		const Names = this.TxTypeName;
 		const value = data[key];
 		var valueName = 'unknown transaction type';
-		if (value in mapping)
-			valueName = mapping[value];
+		if (value in Names)
+			valueName = Names[value];
 
 		data[key + '_str'] = valueName;
 		data[key + '_fmt'] = valueName + " <span class='dim'>(0x" + this.int2ShortHex(value) + ")</span>";
 	},
 
-	// endformat
+	// endregion
 
-	// region high-level format functions
+	// region high-level transaction format functions
 
 	formatAccount: function(item) {
 		this.fmtCatapultAddress('address', item.account);
@@ -359,7 +397,6 @@ var CatapultFormat = function(app) {
 	},
 	formatMosaicProperty: function(i, item) {
 		this.fmtPropertyType('propertyType', item.transaction);
-		console.log('mosaic property', item.transaction);
 		var self = this;
 		$.each(item.transaction.modifications, function(j, at){
 			self.fmtPropertyModificationType('type', at);
@@ -368,7 +405,6 @@ var CatapultFormat = function(app) {
 	},
 	formatTransactionTypeProperty: function(i, item) {
 		this.fmtPropertyType('propertyType', item.transaction);
-		console.log('transaction type property', item.transaction);
 		var self = this;
 		$.each(item.transaction.modifications, function(j, at){
 			self.fmtPropertyModificationType('type', at);
@@ -412,7 +448,91 @@ var CatapultFormat = function(app) {
 		this.fmtCatapultHeight('height', item.block);
 		this.fmtCatapultPublicKey('signer', item.block);
 		this.fmtTimestamp('timestamp', item.block, epochTimestamp);
-	}
+	},
+
+	// endregion
+
+	// region low-level receipt format functions
+
+	fmtReceiptTypeName: function(key, data) {
+		if (!(key in data)) { return; }
+		const Names = this.ReceiptTypeName;
+		const value = data[key];
+		var valueName = 'unknown receipt type';
+		if (value in Names)
+			valueName = Names[value];
+
+		data[key + '_str'] = valueName;
+		data[key + '_fmt'] = valueName + " <span class='dim'>(0x" + this.int2ShortHex(value) + ")</span>";
+	},
+
+	// endregion
+
+	// region high-level receipt format functions
+
+	formatOtherReceipt: function(i, item) {
+	},
+	formatBalanceTransferReceipt: function(i, item) {
+		this.fmtCatapultPublicKey('sender', item);
+		this.fmtCatapultAddress('recipient', item);
+		this.fmtMosaicId('mosaicId', item);
+		this.fmtCatapultValue('amount', item);
+	},
+	formatBalanceCreditReceipt: function(i, item) {
+		this.fmtCatapultPublicKey('account', item);
+		this.fmtMosaicId('mosaicId', item);
+		this.fmtCatapultValue('amount', item);
+
+		item['balance_change_sign'] = '+';
+		item['balance_change_description'] = 'increase';
+	},
+	formatBalanceDebitReceipt: function(i, item) {
+		this.fmtCatapultPublicKey('account', item);
+		this.fmtMosaicId('mosaicId', item);
+		this.fmtCatapultValue('amount', item);
+
+		item['balance_change_sign'] = '-';
+		item['balance_change_description'] = 'decrease';
+	},
+	formatArtifactExpiryReceipt: function(i, item) {
+		const prototype = app.context_prototype.prototype;
+		if (prototype.ReceiptType.MosaicExpired === item.type)
+			this.fmtMosaicId('artifactId', item);
+		else if (prototype.ReceiptType.NamespaceExpired == item.type)
+			this.fmtCatapultId('artifactId', item);
+	},
+	formatInflationReceipt: function(i, item) {
+		this.fmtMosaicId('mosaicId', item);
+		this.fmtCatapultValue('amount', item);
+	},
+	formatAggregateReceipt: function(i, item) {
+	},
+	formatAliasResolutionReceipt: function(i, item) {
+	},
+	formatReceipt: function (i, item) {
+		this.fmtReceiptTypeName('type', item);
+
+		const prototype = app.context_prototype.prototype;
+		const basicReceiptType = prototype.ReceiptTypeToBasicReceiptType(item.type);
+		var dispatcher = {
+			[prototype.BasicReceiptType.Other]:           this.formatOtherReceipt,
+			[prototype.BasicReceiptType.BalanceTransfer]: this.formatBalanceTransferReceipt,
+			[prototype.BasicReceiptType.BalanceCredit]:   this.formatBalanceCreditReceipt,
+			[prototype.BasicReceiptType.BalanceDebit]:    this.formatBalanceDebitReceipt,
+			[prototype.BasicReceiptType.ArtifactExpiry]:  this.formatArtifactExpiryReceipt,
+			[prototype.BasicReceiptType.Inflation]:       this.formatInflationReceipt,
+			[prototype.BasicReceiptType.Aggregate]:       this.formatAggregateReceipt,
+			[prototype.BasicReceiptType.AliasResolution]: this.formatAliasResolutionReceipt,
+		};
+
+		if (!(basicReceiptType in dispatcher))
+			console.log('unknown receipt type', i, item);
+		else
+			dispatcher[basicReceiptType].call(this, i, item);
+	},
+
+	// endregion
+
 	/*,
 	fmtTime: function(key, data) {
 		if (!(key in data)) { return; }
@@ -424,7 +544,6 @@ var CatapultFormat = function(app) {
 	}
 	*/
 	//var nemEpoch = Date.UTC(2015, 2, 29, 0, 6, 25, 0)
-	});
 
-	// endregion
+	});
 };
