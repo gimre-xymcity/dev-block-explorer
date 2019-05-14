@@ -1,0 +1,31 @@
+<h5>harvesters</h5>
+
+{{^hasStats}}
+<div class="row">
+	<div class="{{styles}}" style='background-color: #f0f8ff'> Loading ({{numBlocks}}) </div>
+</div>
+{{/hasStats}}
+{{#hasStats}}
+<div class="row">
+	<div class="twelve columns" style='background-color: #f0f8ff'> last {{numBlocks}} blocks </div>
+</div>
+
+<table id="harvesters" class="u-full-width">
+<thead>
+<tr>
+	<th>Harvester</th>
+	<th>Blocks</th>
+</tr>
+</thead>
+{{#harvesters}}
+<tr>
+	<td class='mono'><a href='#/account/{{harvester}}'>{{harvester}}</a></td>
+	<td>{{count}}</td>
+</tr>
+{{/harvesters}}
+<tbody>
+
+</tbody>
+</table>
+
+{{/hasStats}}
