@@ -17,7 +17,10 @@ var CatapultFormat = function(app) {
 		return hex;
 	},
 	long2val: function (data) {
-		return data[0] + data[1] * 4294967296;
+		if (typeof data !== 'string')
+			throw 'String expected as a param to long2val';
+
+		return parseInt(data, 10);
 	},
 	int2Hex: function(value) {
 		return ("0000000" + ((value|0)+4294967296).toString(16)).substr(-8);
@@ -71,8 +74,8 @@ var CatapultFormat = function(app) {
 	},
 	fmtCatapultId: function(key, data) {
 		if (!(key in data)) { return; }
-		data[key + '_str'] = "0x" + this.int2Hex(data[key][1]) + "<span class='sep'></span>" + this.int2Hex(data[key][0]);
-		data[key + '_fmt'] = "0x" + this.int2Hex(data[key][1]) + "<span class='sep'></span>" + this.int2Hex(data[key][0]);
+		data[key + '_str'] = data[key];
+		data[key + '_fmt'] = data[key];
 	},
 	fmtMosaicId: function(key, data) {
 		if (!(key in data)) { return; }
@@ -94,13 +97,13 @@ var CatapultFormat = function(app) {
 		}
 
 		var name = '';
-		if (mosaicId[1] === 0x941299b2 && mosaicId[0] === 0xb7e1291c) {
+		if (mosaicId === "941299b2b7e1291c") {
 			name = 'cat.harvest';
-		} else if (mosaicId[1] === 0x85bbea6c && mosaicId[0] === 0xc462b244) {
+		} else if (mosaicId === "85bbea6cc462b244") {
 			name = 'cat.currency;'
-		} else if (mosaicId[1] === 0x26514E2A&& mosaicId[0] === 0x1EF33824) {
+		} else if (mosaicId === "26514E2A1EF33824") {
 			name = 'RAW cat.harvest';
-		} else if (mosaicId[1] === 0x0DC67FBE && mosaicId[0] === 0x1CAD29E3) {
+		} else if (mosaicId === "0DC67FBE1CAD29E3") {
 			name = 'RAW cat.currency';
 		}
 
@@ -112,28 +115,12 @@ var CatapultFormat = function(app) {
 		}
 
 		if ((key + '_orig') in data) {
-			data[key + '_alias_fmt'] = data[key + 'fmt_orig'];
+			data[key + '_alias_fmt'] = data[key + '_fmt_orig'];
 		}
 	},
 	fmtMosaicNonce: function(key, data) {
 		data[key + '_str'] = "0x" + this.int2Hex(data[key]);
 		data[key + '_fmt'] = "0x" + this.int2Hex(data[key]);
-	},
-	fmtMosaicPropertyValue: function(key, data) {
-		if (!(key in data)) { return; }
-		data[key + '_str'] = "0x" + this.int2Hex(data[key][1]) + "<span class='sep'></span>" + this.int2Hex(data[key][0]);
-		data[key + '_fmt'] = "0x" + this.int2Hex(data[key][1]) + "<span class='sep'></span>" + this.int2Hex(data[key][0]);
-	},
-	fmtMosaicPropertyId: function(key, data) {
-		if (!(key in data)) { return; }
-		var mapping = {
-			0: 'flags',
-			1: 'divisibility',
-			2: 'duration'
-		};
-		var value = mapping[data[key]];
-		data[key + '_str'] = value;
-		data[key + '_fmt'] = value;
 	},
 	fmtHashAlgorithm: function(key, data) {
 		if (!(key in data)) { return; }
@@ -183,7 +170,6 @@ var CatapultFormat = function(app) {
 		data[key + '_str'] = value;
 		data[key + '_fmt'] = value;
 	},
-
 	fmtCatapultValue: function(key,data) {
 		if (data===null || !(key in data)) { return; }
 		var o = this.long2val(data[key]);
@@ -243,9 +229,7 @@ var CatapultFormat = function(app) {
 			const unresolved = data[key + '_orig'];
 			var loStr = unresolved.substr(8, 2) + unresolved.substr(6, 2) + unresolved.substr(4, 2) + unresolved.substr(2, 2);
 			var hiStr = unresolved.substr(16, 2) + unresolved.substr(14, 2) + unresolved.substr(12, 2) + unresolved.substr(10, 2);
-			var hi = parseInt(hiStr, 16);
-			var lo = parseInt(loStr, 16);
-			data[key + '_alias'] = [lo, hi];
+			data[key + '_alias'] = hiStr + loStr;
 			this.fmtCatapultId(key + '_alias', data);
 		}
 	},
@@ -304,6 +288,16 @@ var CatapultFormat = function(app) {
 		data[key + '_str'] = valueName;
 		data[key + '_fmt'] = valueName + " <span class='dim'>(0x" + this.int2ShortHex(value) + ")</span>";
 	},
+	fmtAliasAction: function (key, data) {
+		if (!(key in data)) { return; }
+		var mapping = {
+			0: 'Unlink',
+			1: 'Link'
+		};
+		var value = mapping[data[key]];
+		data[key + '_str'] = value;
+		data[key + '_fmt'] = value;
+	},
 
 	// endregion
 
@@ -327,7 +321,7 @@ var CatapultFormat = function(app) {
 		});
 	},
 	formatTransferTransaction: function(i, item) {
-		this.fmtCatapultAddress('recipient', item.transaction);
+		this.fmtCatapultAddress('recipientAddress', item.transaction);
 		var self = this;
 		$.each(item.transaction.mosaics, function(j, at){
 			self.fmtCatapultValue('amount', at);
@@ -336,18 +330,16 @@ var CatapultFormat = function(app) {
 		this.fmtMsg(item.transaction.message);
 	},
 	formatRegisterNamespaceTransaction: function(i, item) {
-		this.fmtCatapultId('namespaceId', item.transaction);
+		this.fmtCatapultId('id', item.transaction);
 		this.fmtCatapultId('parentId', item.transaction);
 		this.fmtDuration('duration', item.transaction);
 	},
 	formatMosaicDefinitionTransaction: function(i, item) {
-		this.fmtCatapultId('mosaicId', item.transaction);
-		this.fmtMosaicNonce('mosaicNonce', item.transaction);
-		var self = this;
-		$.each(item.transaction.properties, function(j, at){
-			self.fmtMosaicPropertyId('id', at);
-			self.fmtMosaicPropertyValue('value', at);
-		});
+		this.fmtCatapultId('id', item.transaction);
+		this.fmtMosaicNonce('nonce', item.transaction);
+
+		this.fmtDuration('duration', item.transaction);
+		//this.fmtCatapultValue('flags', item.transaction);
 	},
 	formatMosaicSupplyTransaction: function(i, item) {
 		this.fmtMosaicId('mosaicId', item.transaction);
@@ -375,17 +367,23 @@ var CatapultFormat = function(app) {
 	},
 	formatAliasAddressTransaction: function(i, item) {
 		this.fmtCatapultAddress('address', item.transaction);
+		this.fmtAliasAction('aliasAction', item.transaction);
 		// use fmtMosaicId deliberately here
 		this.fmtMosaicId('namespaceId', item.transaction);
+
+		console.log(item);
 	},
 	formatAliasMosaicTransaction: function(i, item) {
 		this.fmtMosaicId('mosaicId', item.transaction);
+		this.fmtAliasAction('aliasAction', item.transaction);
 		// use fmtMosaicId deliberately here
 		this.fmtMosaicId('namespaceId', item.transaction);
 	},
 	formatAccountLinkTransaction: function(i, item) {
 		// temporary
-		this.fmtUnbase('bin', item.transaction);
+		//this.fmtUnbase('remotePublicKey', item.transaction);
+		this.fmtAliasAction('linkAction', item.transaction);
+		console.log(item);
 	},
 	formatAddressProperty: function(i, item) {
 		this.fmtPropertyType('propertyType', item.transaction);
@@ -411,9 +409,23 @@ var CatapultFormat = function(app) {
 			self.fmtTransactionTypeName('value', at);
 		});
 	},
+	formatAccountMetadataTransaction(i, item) {
+		console.log(item);
+		this.fmtCatapultPublicKey('targetPublicKey', item);
+	},
+	formatMosaicMetadataTransaction(i, item) {
+		console.log(item);
+		this.fmtCatapultPublicKey('targetPublicKey', item);
+		this.fmtMosaicId('targetMosaicId', item);
+	},
+	formatNamespaceMetadataTransaction(i, item) {
+		this.fmtCatapultPublicKey('targetPublicKey', item);
+		// use fmtMosaicId deliberately here
+		this.fmtMosaicId('targetNamespaceId', item);
+	},
 	formatTransaction: function(i, item, epochTimestamp) {
 		this.fmtCatapultHeight('height', item.meta);
-		this.fmtCatapultValue('fee', item.transaction);
+		this.fmtCatapultValue('maxFee', item.transaction);
 		this.fmtTimestamp('deadline', item.transaction, epochTimestamp);
 		this.fmtCatapultPublicKey('signer', item.transaction);
 
@@ -422,6 +434,9 @@ var CatapultFormat = function(app) {
 			[TxType.AccountLink]: this.formatAccountLinkTransaction,
 			[TxType.AggregateComplete]: this.formatAggregateTransaction,
 			[TxType.AggregateBonded]: this.formatAggregateTransaction,
+			[TxType.AccountMetadata]: this.formatAccountMetadataTransaction,
+			[TxType.MosaicMetadata]: this.formatMosaicMetadataTransaction,
+			[TxType.NamespaceMetadata]: this.formatNamespaceMetadataTransaction,
 			[TxType.HashLock]: this.formatHashLockTransaction,
 			[TxType.SecretLock]: this.formatSecretLockTransaction,
 			[TxType.SecretProof]: this.formatSecretProofTransaction,
@@ -446,7 +461,8 @@ var CatapultFormat = function(app) {
 	formatBlock: function(i, item, epochTimestamp) {
 		this.fmtCatapultValue('totalFee', item.meta);
 		this.fmtCatapultHeight('height', item.block);
-		this.fmtCatapultPublicKey('signer', item.block);
+		this.fmtCatapultPublicKey('signerPublicKey', item.block);
+		this.fmtCatapultPublicKey('beneficiaryPublicKey', item.block);
 		this.fmtTimestamp('timestamp', item.block, epochTimestamp);
 	},
 
@@ -473,8 +489,8 @@ var CatapultFormat = function(app) {
 	formatOtherReceipt: function(i, item) {
 	},
 	formatBalanceTransferReceipt: function(i, item) {
-		this.fmtCatapultPublicKey('sender', item);
-		this.fmtCatapultAddress('recipient', item);
+		this.fmtCatapultPublicKey('senderPublicKey', item);
+		this.fmtCatapultAddress('recipientAddress', item);
 		this.fmtMosaicId('mosaicId', item);
 		this.fmtCatapultValue('amount', item);
 	},
@@ -495,6 +511,8 @@ var CatapultFormat = function(app) {
 		item['balance_change_description'] = 'decrease';
 	},
 	formatArtifactExpiryReceipt: function(i, item) {
+		console.log(item);
+
 		const prototype = app.context_prototype.prototype;
 		if (prototype.ReceiptType.MosaicExpired === item.type)
 			this.fmtMosaicId('artifactId', item);
@@ -511,7 +529,6 @@ var CatapultFormat = function(app) {
 	},
 	formatReceipt: function (i, item) {
 		this.fmtReceiptTypeName('type', item);
-
 		const prototype = app.context_prototype.prototype;
 		const basicReceiptType = prototype.ReceiptTypeToBasicReceiptType(item.type);
 		var dispatcher = {

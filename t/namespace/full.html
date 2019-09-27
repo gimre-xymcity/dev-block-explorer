@@ -30,17 +30,17 @@ Register Namespace transaction
 		Sender:
 	</div>
 	<div class="eight columns mono">
-		<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a>
+		<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a>
 	</div>
 </div>
 
-{{^transaction.namespaceType}}
+{{^transaction.registrationType}}
 <div class="row">
 	<div class="three columns">
 		ROOT namespace:
 	</div>
 	<div class="eight columns mono">
-		{{transaction.name}} <span class="dim">{{{transaction.namespaceId_fmt}}}</span>
+		{{transaction.name}} <span class="dim">{{{transaction.id_fmt}}}</span>
 	</div>
 </div>
 
@@ -52,15 +52,15 @@ Register Namespace transaction
 		{{transaction.duration_fmt}}
 	</div>
 </div>
-{{/transaction.namespaceType}}
+{{/transaction.registrationType}}
 
-{{#transaction.namespaceType}}
+{{#transaction.registrationType}}
 <div class="row">
 	<div class="three columns">
 		namespace:
 	</div>
 	<div class="eight columns mono">
-		{{transaction.name}}
+		{{transaction.name}} <span class="dim">{{{transaction.id_fmt}}}</span>
 	</div>
 </div>
 
@@ -72,15 +72,15 @@ Register Namespace transaction
 		{{{transaction.parentId_fmt}}}
 	</div>
 </div>
-{{/transaction.namespaceType}}
+{{/transaction.registrationType}}
 
 {{^meta.aggregateId}}
 <div class="row">
 	<div class="three columns">
-		Fee:
+		Max fee:
 	</div>
 	<div class="eight columns mono">
-		{{{transaction.fee_fmt}}}
+		{{{transaction.maxFee_fmt}}}
 	</div>
 </div>
 

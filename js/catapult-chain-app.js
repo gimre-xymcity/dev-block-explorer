@@ -181,7 +181,8 @@
 		}
 
 		function createResolver(resolutionStatements) {
-			var mapping = resolutionStatements.reduce((map, resolution) => {
+			var mapping = resolutionStatements.reduce((map, resolutionObj) => {
+				var resolution = resolutionObj.statement;
 				map[resolution.unresolved] = resolution.resolutionEntries;
 				return map;
 			}, {});
@@ -201,14 +202,17 @@
 			}
 		}
 
-		var prepareReceiptsRenderers = function(context, divName, statement, output) {
-			$.each(statement['receipts'], (i, item) => context.formatReceipt(i, item));
-
+		var prepareReceiptsRenderers = function(context, divName, statementObj, output) {
+			var statement = statementObj.statement;
 			var cbs = output || [];
 			cbs.push(() => context.render('t/receipts.html', statement).replace(divName));
-			$.each(statement['receipts'], (i, receipt) =>
-				cbs.push(createReceiptRenderer(context, receipt, renderer => renderer.appendTo('.receipts_list:last')))
-			);
+
+			if (statement) {
+				$.each(statement['receipts'], (i, item) => context.formatReceipt(i, item));
+				$.each(statement['receipts'], (i, receipt) =>
+					cbs.push(createReceiptRenderer(context, receipt, renderer => renderer.appendTo('.receipts_list:last')))
+				);
+			}
 
 			return cbs;
 		}
@@ -227,7 +231,8 @@
 			txes.header = header;
 
 			if ('receipts' in txes) {
-				$.each(txes['receipts']['transactionStatements'], function(i, item) {
+				$.each(txes['receipts']['transactionStatements'], function(i, statementObj) {
+					var item = statementObj.statement;
 					// skip block statements
 					if (0 === item.source.primaryId)
 						return;
@@ -250,13 +255,13 @@
 
 		var prepareFullTxesRenderers = function(context, divName, txes, primaryIndex) {
 			$.each(txes['transfers'], (i, item) => {
-				console.log(item);
-				context.formatTransaction(i, item, epochTimestamp)
+				context.formatTransaction(i, item, epochTimestamp);
 				item.receipts = [];
 			});
 
 			if ('receipts' in txes) {
-				$.each(txes['receipts']['transactionStatements'], function(i, item) {
+				$.each(txes['receipts']['transactionStatements'], function(i, statementObj) {
+					var item = statementObj.statement;
 					if (primaryIndex + 1 === item.source.primaryId && 0 < item.source.secondaryId) {
 						txes['transfers'][item.source.secondaryId - 1].receipts = item['receipts'];
 					}
@@ -338,7 +343,7 @@
 		function pullMore(context, self, numProgress, promise) {
 			return promise.then(items => {
 				self.blocks = self.blocks.concat(items);
-				var queryHeight = array2number(items[items.length - 1].block.height) - 100;
+				var queryHeight = uint64ToNumber(items[items.length - 1].block.height) - 100;
 
 				if (12 == numProgress) {
 					var byHarvester = new Map();
@@ -374,7 +379,7 @@
 
 			let promise = getJson('/chain/height')
 			.then(chainHeightObj => {
-				var chainHeight = array2number(chainHeightObj.height);
+				var chainHeight = uint64ToNumber(chainHeightObj.height);
 				var queryHeight = alignDown(chainHeight, 100);
 
 				context.render('t/harvesters.html', { styles: 'one column'})
@@ -391,8 +396,8 @@
 			return (Math.floor((height - 1) / alignment) * alignment) + 1;
 		}
 
-		function array2number(array) {
-			return array[1] * 4294967296 + array[0]
+		function uint64ToNumber(array) {
+			return parseInt(array, 10);
 		}
 
 		// show blocks up to the specified height
@@ -407,7 +412,7 @@
 
 			getJson('/chain/height')
 			.then(chainHeightObj => {
-				var chainHeight = array2number(chainHeightObj.height);
+				var chainHeight = uint64ToNumber(chainHeightObj.height);
 				var queryHeight = blockHeight;
 				if (0 === queryHeight)
 					queryHeight = alignDown(chainHeight, 100);
@@ -548,7 +553,8 @@
 		});
 
 		function findFirstTransactionStatement(statements, index, secondary) {
-			return statements.find(statement => index + 1 == statement.source.primaryId && secondary == statement.source.secondaryId);
+			return statements.find(statementObj =>
+				index + 1 == statementObj.statement.source.primaryId && secondary == statementObj.statement.source.secondaryId);
 		}
 
 		// show a single tx
@@ -576,7 +582,7 @@
 						context.render('t/' + txName + '/full.html', this.transaction)
 							.appendTo(context.$element());
 
-					var statements = receipts["transactionStatements"]
+					var statements = receipts["transactionStatements"];
 					var transactionStatement = findFirstTransactionStatement(statements, this.transaction.meta.index, 0);
 					if (!transactionStatement) {
 						transactionRenderer();

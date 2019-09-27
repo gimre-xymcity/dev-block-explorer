@@ -1,8 +1,8 @@
 <tr class='data{{#className}} {{className}}{{/className}}'>
 <td class='mono'>
-	<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a> <br>
-	create mosaic id: {{{transaction.mosaicId_fmt}}}
-	<span class='dim'>mosaicNonce {{{transaction.mosaicNonce_fmt}}}</span>
+	<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a> <br>
+	create mosaic id: {{{transaction.id_fmt}}}
+	<span class='dim'>nonce {{{transaction.nonce_fmt}}}</span>
 </td>
 <td>{{meta.height_str}} </td>
 <td>

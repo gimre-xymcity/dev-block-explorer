@@ -30,7 +30,7 @@ Account link transaction
 		Sender:
 	</div>
 	<div class="eight columns mono">
-		<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a>
+		<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a>
 	</div>
 </div>
 
@@ -39,17 +39,18 @@ Account link transaction
 		Linked:
 	</div>
 	<div class="eight columns mono">
-		<a href="#/account/{{transaction.remoteAccountKey}}/0">{{transaction.remoteAccountKey}}</a>
+		{{transaction.linkAction_fmt}}
+		<a href="#/account/{{transaction.remotePublicKey}}/0">{{transaction.remotePublicKey}}</a>
 	</div>
 </div>
 
 {{^meta.aggregateId}}
 <div class="row">
 	<div class="three columns">
-		Fee:
+		Max fee:
 	</div>
 	<div class="eight columns mono">
-		{{{transaction.fee_fmt}}}
+		{{{transaction.maxFee_fmt}}}
 	</div>
 </div>
 

@@ -30,7 +30,7 @@ Mosaic definition transaction
 		Sender:
 	</div>
 	<div class="eight columns mono">
-		<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a>
+		<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a>
 	</div>
 </div>
 
@@ -39,7 +39,7 @@ Mosaic definition transaction
 		mosaic id:
 	</div>
 	<div class="eight columns mono">
-		<b>{{{transaction.mosaicId_fmt}}}</b>
+		<b>{{{transaction.id_fmt}}}</b>
 	</div>
 </div>
 
@@ -48,17 +48,17 @@ Mosaic definition transaction
 		nonce:
 	</div>
 	<div class="eight columns mono">
-		{{{transaction.mosaicNonce_fmt}}}
+		{{{transaction.nonce_fmt}}}
 	</div>
 </div>
 
 {{^meta.aggregateId}}
 <div class="row">
 	<div class="three columns">
-		Fee:
+		Max fee:
 	</div>
 	<div class="eight columns mono">
-		{{{transaction.fee_fmt}}}
+		{{{transaction.maxFee_fmt}}}
 	</div>
 </div>
 
@@ -81,16 +81,32 @@ Mosaic definition transaction
 </div>
 {{/meta.aggregateId}}
 
-{{#transaction.properties.length}}
 <div class="row">
 	<div class="three columns">
-		Properties present:
+		Divisibility:
 	</div>
-	<div class="eight columns mono">
-		<strong>{{transaction.properties.length}}</strong>
+	<div class="eight columns">
+		{{transaction.divisibility}}
 	</div>
 </div>
-{{/transaction.properties.length}}
+
+<div class="row">
+	<div class="three columns">
+		Duration:
+	</div>
+	<div class="eight columns">
+		{{transaction.duration_fmt}}
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Flags:
+	</div>
+	<div class="eight columns">
+		{{transaction.flags}}
+	</div>
+</div>
 
 {{#transaction.properties}}
 <div class="row">

@@ -30,7 +30,7 @@ Secret lock transaction
 		Sender:
 	</div>
 	<div class="eight columns mono">
-		<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a>
+		<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a>
 	</div>
 </div>
 
@@ -74,20 +74,20 @@ Secret lock transaction
 		Recipient:
 	</div>
 	<div class="eight columns mono breaklong">
-		<a href="#/account/{{transaction.recipient}}/0">{{transaction.recipient_fmt}}</a>
-		{{#transaction.recipient_alias_fmt}}
-			<span class='dim'>via alias ({{{transaction.recipient_alias_fmt}}})</span>
-		{{/transaction.recipient_alias_fmt}}
+		<a href="#/account/{{transaction.recipientAddress}}/0">{{transaction.recipientAddress_fmt}}</a>
+		{{#transaction.recipientAddress_alias_fmt}}
+			<span class='dim'>via alias ({{{transaction.recipientAddress_alias_fmt}}})</span>
+		{{/transaction.recipientAddress_alias_fmt}}
 	</div>
 </div>
 
 {{^meta.aggregateId}}
 <div class="row">
 	<div class="three columns">
-		Fee:
+		Max fee:
 	</div>
 	<div class="eight columns mono">
-		{{{transaction.fee_fmt}}}
+		{{{transaction.maxFee_fmt}}}
 	</div>
 </div>
 

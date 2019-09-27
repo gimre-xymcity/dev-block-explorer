@@ -30,7 +30,7 @@ Secret proof transaction
 		Sender:
 	</div>
 	<div class="eight columns mono">
-		<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a>
+		<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a>
 	</div>
 </div>
 
@@ -67,10 +67,10 @@ Secret proof transaction
 {{^meta.aggregateId}}
 <div class="row">
 	<div class="three columns">
-		Fee:
+		Max fee:
 	</div>
 	<div class="eight columns mono">
-		{{{transaction.fee_fmt}}}
+		{{{transaction.maxFee_fmt}}}
 	</div>
 </div>
 

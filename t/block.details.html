@@ -38,7 +38,16 @@
 		Harvester:
 	</div>
 	<div class="nine columns">
-		<a class='mono' href="#/account/{{block.signer}}/0">{{block.signer}}</a>
+		<a class='mono' href="#/account/{{block.signerPublicKey}}/0">{{block.signerPublicKey}}</a>
+	</div>
+</div>
+
+<div class="row">
+	<div class="three columns">
+		Beneficiary:
+	</div>
+	<div class="nine columns">
+		<a class='mono' href="#/account/{{block.beneficiaryPublicKey}}/0">{{block.beneficiaryPublicKey}}</a>
 	</div>
 </div>
 
@@ -80,7 +89,7 @@
 		&nbsp;
 	</div>
 </div>
-	{{#meta.subCacheMerkleRoots}}
+	{{#meta.stateHashSubCacheMerkleRoots}}
 	<div class="row">
 		<div class="two columns">
 			&nbsp;:
@@ -89,7 +98,7 @@
 			{{.}}
 		</div>
 	</div>
-	{{/meta.subCacheMerkleRoots}}
+	{{/meta.stateHashSubCacheMerkleRoots}}
 </div>
 
 <div id="block_transactions" class="txlist">

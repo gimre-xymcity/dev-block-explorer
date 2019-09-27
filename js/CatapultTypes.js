@@ -2,12 +2,13 @@ var CatapultTypes = function(app) {
 	var FacilityType = {
 		Aggregate: 0x41,    // A
 		Core: 0x43,         // C
-		LockHash: 0x48,    // H
-		AccountLink: 0x4C, // L
+		Metadata: 0x44,     // D
+		LockHash: 0x48,     // H
+		AccountLink: 0x4C,  // L
 		Mosaic: 0x4D,       // M
 		Namespace: 0x4E,    // N
 		Property: 0x50,     // P
-		LockSecret: 0x52,  // R
+		LockSecret: 0x52,   // R
 		Transfer: 0x54,     // T
 		Multisig: 0x55,     // U
 	};
@@ -35,6 +36,9 @@ var CatapultTypes = function(app) {
 	const TxType = {
 		AggregateComplete:       makeTransactionType(1, FacilityType.Aggregate),
 		AggregateBonded:         makeTransactionType(2, FacilityType.Aggregate),
+		AccountMetadata:         makeTransactionType(1, FacilityType.Metadata),
+		MosaicMetadata:          makeTransactionType(2, FacilityType.Metadata),
+		NamespaceMetadata:       makeTransactionType(3, FacilityType.Metadata),
 		HashLock:                makeTransactionType(1, FacilityType.LockHash),
 		AccountLink:             makeTransactionType(1, FacilityType.AccountLink),
 		MosaicDefinition:        makeTransactionType(1, FacilityType.Mosaic),
@@ -66,11 +70,11 @@ var CatapultTypes = function(app) {
 		LockSecretExpired:      makeReceiptType(BasicReceiptType.BalanceCredit, 3, FacilityType.LockSecret),
 
 		MosaicExpired:          makeReceiptType(BasicReceiptType.ArtifactExpiry, 1, FacilityType.Mosaic),
-		MosaicLevy:             makeReceiptType(BasicReceiptType.BalanceTransfer, 2, FacilityType.Mosaic),
-		MosaicRentalFee:        makeReceiptType(BasicReceiptType.BalanceTransfer, 3, FacilityType.Mosaic),
+		MosaicRentalFee:        makeReceiptType(BasicReceiptType.BalanceTransfer, 2, FacilityType.Mosaic),
 
 		NamespaceExpired:       makeReceiptType(BasicReceiptType.ArtifactExpiry, 1, FacilityType.Namespace),
-		NamespaceRentalFee:     makeReceiptType(BasicReceiptType.BalanceTransfer, 2, FacilityType.Namespace),
+		NamespaceDeleted:       makeReceiptType(BasicReceiptType.ArtifactExpiry, 2, FacilityType.Namespace),
+		NamespaceRentalFee:     makeReceiptType(BasicReceiptType.BalanceTransfer, 3, FacilityType.Namespace),
 	};
 
 	this.helpers({
@@ -80,6 +84,9 @@ var CatapultTypes = function(app) {
 			// note aggregate is handled differently
 			[TxType.HashLock]:                'hashlock',
 			[TxType.AccountLink]:             'accountLink',
+			[TxType.AccountMetadata]:         'metadataAccount',
+			[TxType.MosaicMetadata]:          'metadataMosaic',
+			[TxType.NamespaceMetadata]:       'metadataNamespace',
 			[TxType.MosaicDefinition]:        'mosaic',
 			[TxType.MosaicSupplyChange]:      'mosaicSupply',
 			[TxType.RegisterNamespace]:       'namespace',
@@ -96,6 +103,9 @@ var CatapultTypes = function(app) {
 		TxTypeName: {
 			[TxType.AggregateComplete]:       'aggregate complete',
 			[TxType.AggregateBonded]:         'aggregate bonded',
+			[TxType.AccountMetadata]:         'account metadata',
+			[TxType.MosaicMetadata]:          'mosaic metadata',
+			[TxType.NamespaceMetadata]:       'namespace metadata',
 			[TxType.HashLock]:                'hash lock',
 			[TxType.AccountLink]:             'account link',
 			[TxType.MosaicDefinition]:        'mosaic definition',
@@ -136,9 +146,9 @@ var CatapultTypes = function(app) {
 			[ReceiptType.LockSecretCompleted]:    'lock secret completion',
 			[ReceiptType.LockSecretExpired]:      'lock secret expiration',
 			[ReceiptType.MosaicExpired]:          'mosaic expiration',
-			[ReceiptType.MosaicLevy]:             'mosaic levy',
 			[ReceiptType.MosaicRentalFee]:        'mosaic rental fee',
 			[ReceiptType.NamespaceExpired]:       'namespace expiration',
+			[ReceiptType.NamespaceDeleted]:       'namespace deletion',
 			[ReceiptType.NamespaceRentalFee]:     'namespace rental fee',
 		},
 		ReceiptTypeToBasicReceiptType: receiptType => (receiptType & 0xF000) >> 12,

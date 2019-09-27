@@ -1,7 +1,7 @@
 <tr class='data{{#className}} {{className}}{{/className}}'>
 <td class='mono'>
-	<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a> <br>
-	recipient: <a href="#/account/{{transaction.recipient}}/0">{{transaction.recipient_fmt}}</a>
+	<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a> <br>
+	recipient: <a href="#/account/{{transaction.recipientAddress}}/0">{{transaction.recipientAddress_fmt}}</a>
 </td>
 <td>{{meta.height_str}} </td>
 <td>{{{transaction.mosaics.0.amount_fmt}}}

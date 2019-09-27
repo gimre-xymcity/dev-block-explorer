@@ -30,7 +30,7 @@ Transfer transaction
 		Sender:
 	</div>
 	<div class="eight columns mono">
-		<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a>
+		<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a>
 	</div>
 </div>
 
@@ -39,24 +39,13 @@ Transfer transaction
 		Recipient:
 	</div>
 	<div class="eight columns mono">
-		<a href="#/account/{{transaction.recipient}}/0">{{{transaction.recipient_fmt}}}</a>
-		{{#transaction.recipient_alias_fmt}}
-			<span class='dim'>via alias ({{{transaction.recipient_alias_fmt}}})</span>
-		{{/transaction.recipient_alias_fmt}}
+		<a href="#/account/{{transaction.recipientAddress}}/0">{{{transaction.recipientAddress_fmt}}}</a>
+		{{#transaction.recipientAddress_alias_fmt}}
+			<span class='dim'>via alias ({{{transaction.recipientAddress_alias_fmt}}})</span>
+		{{/transaction.recipientAddress_alias_fmt}}
 	</div>
 </div>
 
-{{! if there are any attachments amount is a multiplier, so we don't want to show it }}
-{{^transaction.mosaics}}
-<div class="row">
-	<div class="three columns">
-		Amount:
-	</div>
-	<div class="eight columns mono">
-		<strong>{{{amount_fmt}}}</strong>
-	</div>
-</div>
-{{/transaction.mosaics}}
 {{#transaction.mosaics.length}}
 <div class="row">
 	<div class="three columns">
@@ -82,7 +71,7 @@ Transfer transaction
 	<div class="one column">&nbsp;
 	</div>
 	<div class="two columns">
-		Quantity:
+		Amount:
 	</div>
 	<div class="eight columns mono">
 		{{{amount_fmt}}}
@@ -93,10 +82,10 @@ Transfer transaction
 {{^meta.aggregateId}}
 <div class="row">
 	<div class="three columns">
-		Fee:
+		Max fee:
 	</div>
 	<div class="eight columns mono">
-		{{{transaction.fee_fmt}}}
+		{{{transaction.maxFee_fmt}}}
 	</div>
 </div>
 

@@ -1,7 +1,7 @@
 <tr class='data{{#className}} {{className}}{{/className}}'>
 <td class='mono'>
-	<a href="#/account/{{transaction.signer}}/0">{{transaction.signer}}</a> <br>
-	account link <a href="#/account/{{transaction.remoteAccountKey}}/0">{{transaction.remoteAccountKey}}</a>
+	<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a> <br>
+	account link <a href="#/account/{{transaction.remotePublicKey}}/0">{{transaction.remotePublicKey}}</a>
 </td>
 <td>{{meta.height_str}} </td>
 <td> {{{transaction.amount_fmt}}}
