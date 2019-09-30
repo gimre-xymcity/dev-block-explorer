@@ -1,0 +1,15 @@
+<tr class='data{{#className}} {{className}}{{/className}}'>
+	<td class='mono'>
+		<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a> <br>
+		mosaic restriction (address): {{{transaction.mosaicId_fmt}}}
+	</td>
+	<td>{{meta.height_str}} </td>
+	<td>
+		<br>#receipts: {{receipts.length}} </td>
+	<td>{{transaction.deadline_fmt}}</td>
+	</tr>
+	<tr class='txeshash'>
+	<td class='mono' colspan=5>
+	tx hash: <a href="#/restrictionMosaicAddress/{{meta.id}}">{{meta.hash}}</a>
+	</td>
+	</tr>

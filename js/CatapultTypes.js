@@ -8,6 +8,7 @@ var CatapultTypes = function(app) {
 		Mosaic: 0x4D,              // M
 		Namespace: 0x4E,           // N
 		RestrictionAccount: 0x50,  // P
+		RestrictionMosaic: 0x51,   // Q
 		LockSecret: 0x52,          // R
 		Transfer: 0x54,            // T
 		Multisig: 0x55,            // U
@@ -49,6 +50,8 @@ var CatapultTypes = function(app) {
 		AccountAddressRestriction: makeTransactionType(1, FacilityType.RestrictionAccount),
 		AccountMosaicRestriction:  makeTransactionType(2, FacilityType.RestrictionAccount),
 		AccountTxTypeRestriction:  makeTransactionType(3, FacilityType.RestrictionAccount),
+		MosaicGlobalRestriction:   makeTransactionType(1, FacilityType.RestrictionMosaic),
+		MosaicAddressRestriction:  makeTransactionType(2, FacilityType.RestrictionMosaic),
 		SecretLock:                makeTransactionType(1, FacilityType.LockSecret),
 		SecretProof:               makeTransactionType(2, FacilityType.LockSecret),
 		Transfer:                  makeTransactionType(1, FacilityType.Transfer),
@@ -95,6 +98,8 @@ var CatapultTypes = function(app) {
 			[TxType.AccountAddressRestriction]: 'restrictionAccountAddress',
 			[TxType.AccountMosaicRestriction]:  'restrictionAccountMosaic',
 			[TxType.AccountTxTypeRestriction]:  'restrictionAccountTransactionType',
+			[TxType.MosaicGlobalRestriction]:   'restrictionMosaicGlobal',
+			[TxType.MosaicAddressRestriction]:  'restrictionMosaicAddress',
 			[TxType.SecretLock]:                'secretlock',
 			[TxType.SecretProof]:               'secretproof',
 			[TxType.Transfer]:                  'transfer',
@@ -113,9 +118,11 @@ var CatapultTypes = function(app) {
 			[TxType.RegisterNamespace]:         'register namespace',
 			[TxType.AliasAddress]:              'address alias',
 			[TxType.AliasMosaic]:               'mosaic alias',
-			[TxType.AccountAddressRestriction]: 'address property',
-			[TxType.AccountMosaicRestriction]:  'mosaic property',
-			[TxType.AccountTxTypeRestriction]:  'transaction type property',
+			[TxType.AccountAddressRestriction]: 'account restriction (address)',
+			[TxType.AccountMosaicRestriction]:  'account restriction (mosaic id)',
+			[TxType.AccountTxTypeRestriction]:  'account restriction (tx type)',
+			[TxType.MosaicGlobalRestriction]:   'mosaic restriction (global)',
+			[TxType.MosaicAddressRestriction]:  'mosai restriction (address)',
 			[TxType.SecretLock]:                'secret lock',
 			[TxType.SecretProof]:               'secret proof',
 			[TxType.Transfer]:                  'transfer property',

@@ -156,10 +156,9 @@ var CatapultFormat = function(app) {
 		}
 		data[key + '_fmt'] = o;
 	},
-	fmtRestrictionType: function(key, data) {
+	fmtAccountRestrictionType: function(key, data) {
 		if (!(key in data)) { return; }
 
-		// todo: adjust for blocking
 		var rawRestrictionType = data[key];
 		var prefix = 'allow ';
 		if (rawRestrictionType > 128) {
@@ -181,6 +180,33 @@ var CatapultFormat = function(app) {
 		var value = mapping[rawRestrictionType];
 		data[key + '_str'] = prefix + middle + value;
 		data[key + '_fmt'] = prefix + middle + value;
+	},
+	fmtMosaicRestrictionType: function(key, data) {
+		if (!(key in data)) { return; }
+
+		var mapping = {
+			0: 'none / unset',
+			1: 'EQ (==)',
+			2: 'NE (!=)',
+			3: 'LT (&lt;)',
+			4: 'LE (&lt;=)',
+			5: 'GT (&gt;)',
+			6: 'GE (&lt;=)'
+		};
+		var value = mapping[data[key]];
+		data[key + '_str'] = value;
+		data[key + '_fmt'] = value;
+	},
+	fmtMosaicRestrictionValue: function(key, data) {
+		if (!(key in data)) { return; }
+
+		var value = data[key];
+		if (value == '18446744073709551615') {
+			value = ' sentinel ';
+		}
+
+		data[key + '_str'] = value;
+		data[key + '_fmt'] = value;
 	},
 	fmtCatapultValue: function(key,data) {
 		if (data===null || !(key in data)) { return; }
@@ -398,7 +424,7 @@ var CatapultFormat = function(app) {
 		console.log(item);
 	},
 	formatAccountRestrictionAddress: function(i, item) {
-		this.fmtRestrictionType('restrictionType', item.transaction);
+		this.fmtAccountRestrictionType('restrictionType', item.transaction);
 		var self = this;
 		$.each(item.transaction.modifications, function(j, at){
 			self.fmtPropertyModificationType('type', at);
@@ -406,7 +432,7 @@ var CatapultFormat = function(app) {
 		});
 	},
 	formatAccountRestrictionMosaic: function(i, item) {
-		this.fmtRestrictionType('restrictionType', item.transaction);
+		this.fmtAccountRestrictionType('restrictionType', item.transaction);
 		var self = this;
 		$.each(item.transaction.modifications, function(j, at){
 			self.fmtPropertyModificationType('type', at);
@@ -414,23 +440,34 @@ var CatapultFormat = function(app) {
 		});
 	},
 	formatAccountRestrictionTxType: function(i, item) {
-		this.fmtRestrictionType('restrictionType', item.transaction);
+		this.fmtAccountRestrictionType('restrictionType', item.transaction);
 		var self = this;
 		$.each(item.transaction.modifications, function(j, at){
 			self.fmtPropertyModificationType('type', at);
 			self.fmtTransactionTypeName('value', at);
 		});
 	},
-	formatAccountMetadataTransaction(i, item) {
-		console.log(item);
+	formatMosaicRestrictionGlobal: function(i, item) {
+		this.fmtMosaicId('mosaicId', item.transaction);
+		this.fmtMosaicRestrictionType('previousRestrictionType', item.transaction);
+		this.fmtMosaicRestrictionType('newRestrictionType', item.transaction);
+		this.fmtMosaicRestrictionValue('previousRestrictionValue', item.transaction);
+		this.fmtMosaicRestrictionValue('newRestrictionValue', item.transaction);
+	},
+	formatMosaicRestrictionAddress: function(i, item) {
+		this.fmtMosaicId('mosaicId', item.transaction);
+		this.fmtCatapultAddress('targetAddress', item.transaction);
+		this.fmtMosaicRestrictionValue('previousRestrictionValue', item.transaction);
+		this.fmtMosaicRestrictionValue('newRestrictionValue', item.transaction);
+	},
+	formatAccountMetadataTransaction: function(i, item) {
 		this.fmtCatapultPublicKey('targetPublicKey', item);
 	},
-	formatMosaicMetadataTransaction(i, item) {
-		console.log(item);
+	formatMosaicMetadataTransaction: function(i, item) {
 		this.fmtCatapultPublicKey('targetPublicKey', item);
 		this.fmtMosaicId('targetMosaicId', item);
 	},
-	formatNamespaceMetadataTransaction(i, item) {
+	formatNamespaceMetadataTransaction: function(i, item) {
 		this.fmtCatapultPublicKey('targetPublicKey', item);
 		// use fmtMosaicId deliberately here
 		this.fmtMosaicId('targetNamespaceId', item);
@@ -460,6 +497,8 @@ var CatapultFormat = function(app) {
 			[TxType.AccountAddressRestriction]: this.formatAccountRestrictionAddress,
 			[TxType.AccountMosaicRestriction]: this.formatAccountRestrictionMosaic,
 			[TxType.AccountTxTypeRestriction]: this.formatAccountRestrictionTxType,
+			[TxType.MosaicGlobalRestriction]: this.formatMosaicRestrictionGlobal,
+			[TxType.MosaicAddressRestriction]: this.formatMosaicRestrictionAddress,
 			[TxType.Transfer]: this.formatTransferTransaction,
 			[TxType.ModifyMultisigAccount]: this.formatMultisigTransaction
 		};
