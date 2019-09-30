@@ -156,19 +156,31 @@ var CatapultFormat = function(app) {
 		}
 		data[key + '_fmt'] = o;
 	},
-	fmtPropertyType: function(key, data) {
+	fmtRestrictionType: function(key, data) {
 		if (!(key in data)) { return; }
 
 		// todo: adjust for blocking
+		var rawRestrictionType = data[key];
+		var prefix = 'allow ';
+		if (rawRestrictionType > 128) {
+			prefix = 'block ';
+			rawRestrictionType -= 128;
+		}
+
+		var middle = '';
+		if (rawRestrictionType > 64) {
+			middle = ' outgoing ';
+			rawRestrictionType -= 64;
+		}
 
 		var mapping = {
 			1: 'address',
 			2: 'mosaic id',
 			4: 'transaction type'
 		};
-		var value = mapping[data[key]];
-		data[key + '_str'] = value;
-		data[key + '_fmt'] = value;
+		var value = mapping[rawRestrictionType];
+		data[key + '_str'] = prefix + middle + value;
+		data[key + '_fmt'] = prefix + middle + value;
 	},
 	fmtCatapultValue: function(key,data) {
 		if (data===null || !(key in data)) { return; }
@@ -385,24 +397,24 @@ var CatapultFormat = function(app) {
 		this.fmtAliasAction('linkAction', item.transaction);
 		console.log(item);
 	},
-	formatAddressProperty: function(i, item) {
-		this.fmtPropertyType('propertyType', item.transaction);
+	formatAccountRestrictionAddress: function(i, item) {
+		this.fmtRestrictionType('restrictionType', item.transaction);
 		var self = this;
 		$.each(item.transaction.modifications, function(j, at){
 			self.fmtPropertyModificationType('type', at);
 			self.fmtCatapultAddress('value', at);
 		});
 	},
-	formatMosaicProperty: function(i, item) {
-		this.fmtPropertyType('propertyType', item.transaction);
+	formatAccountRestrictionMosaic: function(i, item) {
+		this.fmtRestrictionType('restrictionType', item.transaction);
 		var self = this;
 		$.each(item.transaction.modifications, function(j, at){
 			self.fmtPropertyModificationType('type', at);
 			self.fmtMosaicId('value', at);
 		});
 	},
-	formatTransactionTypeProperty: function(i, item) {
-		this.fmtPropertyType('propertyType', item.transaction);
+	formatAccountRestrictionTxType: function(i, item) {
+		this.fmtRestrictionType('restrictionType', item.transaction);
 		var self = this;
 		$.each(item.transaction.modifications, function(j, at){
 			self.fmtPropertyModificationType('type', at);
@@ -445,9 +457,9 @@ var CatapultFormat = function(app) {
 			[TxType.RegisterNamespace]: this.formatRegisterNamespaceTransaction,
 			[TxType.AliasAddress]: this.formatAliasAddressTransaction,
 			[TxType.AliasMosaic]: this.formatAliasMosaicTransaction,
-			[TxType.AddressProperty]: this.formatAddressProperty,
-			[TxType.MosaicProperty]: this.formatMosaicProperty,
-			[TxType.TransactionTypeProperty]: this.formatTransactionTypeProperty,
+			[TxType.AccountAddressRestriction]: this.formatAccountRestrictionAddress,
+			[TxType.AccountMosaicRestriction]: this.formatAccountRestrictionMosaic,
+			[TxType.AccountTxTypeRestriction]: this.formatAccountRestrictionTxType,
 			[TxType.Transfer]: this.formatTransferTransaction,
 			[TxType.ModifyMultisigAccount]: this.formatMultisigTransaction
 		};

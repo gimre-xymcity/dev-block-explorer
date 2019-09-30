@@ -1,6 +1,6 @@
 {{#meta.aggregateId}} <hr> <strong> {{/meta.aggregateId}}
 {{^meta.aggregateId}} <h5> {{/meta.aggregateId}}
-Account mosaic property
+Account restriction transaction (by transaction type)
 {{#meta.aggregateId}} </strong> {{/meta.aggregateId}}
 {{^meta.aggregateId}} </h5> {{/meta.aggregateId}}
 
@@ -36,10 +36,10 @@ Account mosaic property
 
 <div class="row">
 	<div class="three columns">
-		property type:
+		Restriction type:
 	</div>
 	<div class="eight columns mono">
-		<b>{{{transaction.propertyType_fmt}}}</b>
+		<b>{{{transaction.restrictionType_fmt}}}</b>
 	</div>
 </div>
 
@@ -91,7 +91,7 @@ Account mosaic property
 		{{{type_fmt}}}:
 	</div>
 	<div class="eight columns mono">
-		{{{value_fmt}}}
+		<a href="#/account/{{value}}/0">{{{value_fmt}}}</a>
 	</div>
 </div>
 {{/transaction.modifications}}

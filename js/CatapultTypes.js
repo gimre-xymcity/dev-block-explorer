@@ -1,16 +1,16 @@
 var CatapultTypes = function(app) {
 	var FacilityType = {
-		Aggregate: 0x41,    // A
-		Core: 0x43,         // C
-		Metadata: 0x44,     // D
-		LockHash: 0x48,     // H
-		AccountLink: 0x4C,  // L
-		Mosaic: 0x4D,       // M
-		Namespace: 0x4E,    // N
-		Property: 0x50,     // P
-		LockSecret: 0x52,   // R
-		Transfer: 0x54,     // T
-		Multisig: 0x55,     // U
+		Aggregate: 0x41,           // A
+		Core: 0x43,                // C
+		Metadata: 0x44,            // D
+		LockHash: 0x48,            // H
+		AccountLink: 0x4C,         // L
+		Mosaic: 0x4D,              // M
+		Namespace: 0x4E,           // N
+		RestrictionAccount: 0x50,  // P
+		LockSecret: 0x52,          // R
+		Transfer: 0x54,            // T
+		Multisig: 0x55,            // U
 	};
 
 	var BasicReceiptType = {
@@ -34,25 +34,25 @@ var CatapultTypes = function(app) {
 
 	// sorted by "facility" (second byte)
 	const TxType = {
-		AggregateComplete:       makeTransactionType(1, FacilityType.Aggregate),
-		AggregateBonded:         makeTransactionType(2, FacilityType.Aggregate),
-		AccountMetadata:         makeTransactionType(1, FacilityType.Metadata),
-		MosaicMetadata:          makeTransactionType(2, FacilityType.Metadata),
-		NamespaceMetadata:       makeTransactionType(3, FacilityType.Metadata),
-		HashLock:                makeTransactionType(1, FacilityType.LockHash),
-		AccountLink:             makeTransactionType(1, FacilityType.AccountLink),
-		MosaicDefinition:        makeTransactionType(1, FacilityType.Mosaic),
-		MosaicSupplyChange:      makeTransactionType(2, FacilityType.Mosaic),
-		RegisterNamespace:       makeTransactionType(1, FacilityType.Namespace),
-		AliasAddress:            makeTransactionType(2, FacilityType.Namespace),
-		AliasMosaic:             makeTransactionType(3, FacilityType.Namespace),
-		AddressProperty:         makeTransactionType(1, FacilityType.Property),
-		MosaicProperty:          makeTransactionType(2, FacilityType.Property),
-		TransactionTypeProperty: makeTransactionType(3, FacilityType.Property),
-		SecretLock:              makeTransactionType(1, FacilityType.LockSecret),
-		SecretProof:             makeTransactionType(2, FacilityType.LockSecret),
-		Transfer:                makeTransactionType(1, FacilityType.Transfer),
-		ModifyMultisigAccount:   makeTransactionType(1, FacilityType.Multisig)
+		AggregateComplete:         makeTransactionType(1, FacilityType.Aggregate),
+		AggregateBonded:           makeTransactionType(2, FacilityType.Aggregate),
+		AccountMetadata:           makeTransactionType(1, FacilityType.Metadata),
+		MosaicMetadata:            makeTransactionType(2, FacilityType.Metadata),
+		NamespaceMetadata:         makeTransactionType(3, FacilityType.Metadata),
+		HashLock:                  makeTransactionType(1, FacilityType.LockHash),
+		AccountLink:               makeTransactionType(1, FacilityType.AccountLink),
+		MosaicDefinition:          makeTransactionType(1, FacilityType.Mosaic),
+		MosaicSupplyChange:        makeTransactionType(2, FacilityType.Mosaic),
+		RegisterNamespace:         makeTransactionType(1, FacilityType.Namespace),
+		AliasAddress:              makeTransactionType(2, FacilityType.Namespace),
+		AliasMosaic:               makeTransactionType(3, FacilityType.Namespace),
+		AccountAddressRestriction: makeTransactionType(1, FacilityType.RestrictionAccount),
+		AccountMosaicRestriction:  makeTransactionType(2, FacilityType.RestrictionAccount),
+		AccountTxTypeRestriction:  makeTransactionType(3, FacilityType.RestrictionAccount),
+		SecretLock:                makeTransactionType(1, FacilityType.LockSecret),
+		SecretProof:               makeTransactionType(2, FacilityType.LockSecret),
+		Transfer:                  makeTransactionType(1, FacilityType.Transfer),
+		ModifyMultisigAccount:     makeTransactionType(1, FacilityType.Multisig)
 	};
 	const ReceiptType = {
 		HarvestFee:             makeReceiptType(BasicReceiptType.BalanceCredit, 1, FacilityType.Core),
@@ -82,44 +82,44 @@ var CatapultTypes = function(app) {
 		TxType: TxType,
 		TxDirectoryNames: {
 			// note aggregate is handled differently
-			[TxType.HashLock]:                'hashlock',
-			[TxType.AccountLink]:             'accountLink',
-			[TxType.AccountMetadata]:         'metadataAccount',
-			[TxType.MosaicMetadata]:          'metadataMosaic',
-			[TxType.NamespaceMetadata]:       'metadataNamespace',
-			[TxType.MosaicDefinition]:        'mosaic',
-			[TxType.MosaicSupplyChange]:      'mosaicSupply',
-			[TxType.RegisterNamespace]:       'namespace',
-			[TxType.AliasAddress]:            'aliasAddress',
-			[TxType.AliasMosaic]:             'aliasMosaic',
-			[TxType.AddressProperty]:         'propertyAddress',
-			[TxType.MosaicProperty]:          'propertyMosaic',
-			[TxType.TransactionTypeProperty]: 'propertyTransactionType',
-			[TxType.SecretLock]:              'secretlock',
-			[TxType.SecretProof]:             'secretproof',
-			[TxType.Transfer]:                'transfer',
-			[TxType.ModifyMultisigAccount]:   'multisig'
+			[TxType.HashLock]:                  'hashlock',
+			[TxType.AccountLink]:               'accountLink',
+			[TxType.AccountMetadata]:           'metadataAccount',
+			[TxType.MosaicMetadata]:            'metadataMosaic',
+			[TxType.NamespaceMetadata]:         'metadataNamespace',
+			[TxType.MosaicDefinition]:          'mosaic',
+			[TxType.MosaicSupplyChange]:        'mosaicSupply',
+			[TxType.RegisterNamespace]:         'namespace',
+			[TxType.AliasAddress]:              'aliasAddress',
+			[TxType.AliasMosaic]:               'aliasMosaic',
+			[TxType.AccountAddressRestriction]: 'restrictionAccountAddress',
+			[TxType.AccountMosaicRestriction]:  'restrictionAccountMosaic',
+			[TxType.AccountTxTypeRestriction]:  'restrictionAccountTransactionType',
+			[TxType.SecretLock]:                'secretlock',
+			[TxType.SecretProof]:               'secretproof',
+			[TxType.Transfer]:                  'transfer',
+			[TxType.ModifyMultisigAccount]:     'multisig'
 		},
 		TxTypeName: {
-			[TxType.AggregateComplete]:       'aggregate complete',
-			[TxType.AggregateBonded]:         'aggregate bonded',
-			[TxType.AccountMetadata]:         'account metadata',
-			[TxType.MosaicMetadata]:          'mosaic metadata',
-			[TxType.NamespaceMetadata]:       'namespace metadata',
-			[TxType.HashLock]:                'hash lock',
-			[TxType.AccountLink]:             'account link',
-			[TxType.MosaicDefinition]:        'mosaic definition',
-			[TxType.MosaicSupplyChange]:      'mosaic supply',
-			[TxType.RegisterNamespace]:       'register namespace',
-			[TxType.AliasAddress]:            'address alias',
-			[TxType.AliasMosaic]:             'mosaic alias',
-			[TxType.AddressProperty]:         'address property',
-			[TxType.MosaicProperty]:          'mosaic property',
-			[TxType.TransactionTypeProperty]: 'transaction type property',
-			[TxType.SecretLock]:              'secret lock',
-			[TxType.SecretProof]:             'secret proof',
-			[TxType.Transfer]:                'transfer property',
-			[TxType.ModifyMultisigAccount]:   'modify multisig account'
+			[TxType.AggregateComplete]:         'aggregate complete',
+			[TxType.AggregateBonded]:           'aggregate bonded',
+			[TxType.AccountMetadata]:           'account metadata',
+			[TxType.MosaicMetadata]:            'mosaic metadata',
+			[TxType.NamespaceMetadata]:         'namespace metadata',
+			[TxType.HashLock]:                  'hash lock',
+			[TxType.AccountLink]:               'account link',
+			[TxType.MosaicDefinition]:          'mosaic definition',
+			[TxType.MosaicSupplyChange]:        'mosaic supply',
+			[TxType.RegisterNamespace]:         'register namespace',
+			[TxType.AliasAddress]:              'address alias',
+			[TxType.AliasMosaic]:               'mosaic alias',
+			[TxType.AccountAddressRestriction]: 'address property',
+			[TxType.AccountMosaicRestriction]:  'mosaic property',
+			[TxType.AccountTxTypeRestriction]:  'transaction type property',
+			[TxType.SecretLock]:                'secret lock',
+			[TxType.SecretProof]:               'secret proof',
+			[TxType.Transfer]:                  'transfer property',
+			[TxType.ModifyMultisigAccount]:     'modify multisig account'
 		},
 		BasicReceiptType: BasicReceiptType,
 		BasicReceiptFileNames: {

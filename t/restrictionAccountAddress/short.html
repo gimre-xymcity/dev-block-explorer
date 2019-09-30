@@ -1,7 +1,7 @@
 <tr class='data{{#className}} {{className}}{{/className}}'>
 <td class='mono'>
 	<a href="#/account/{{transaction.signerPublicKey}}/0">{{transaction.signerPublicKey}}</a> <br>
-	account <b>transaction type</b> property: #modifictions:{{transaction.modifications.length}}
+	account restriction (address): #modifictions:{{transaction.modifications.length}}
 </td>
 <td>{{meta.height_str}} </td>
 <td>
@@ -10,6 +10,6 @@
 </tr>
 <tr class='txeshash'>
 <td class='mono' colspan=5>
-tx hash: <a href="#/propertyTransactionType/{{meta.id}}">{{meta.hash}}</a>
+tx hash: <a href="#/restrictionAccountAddress/{{meta.id}}">{{meta.hash}}</a>
 </td>
 </tr>

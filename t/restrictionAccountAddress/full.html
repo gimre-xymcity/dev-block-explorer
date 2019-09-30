@@ -1,6 +1,6 @@
 {{#meta.aggregateId}} <hr> <strong> {{/meta.aggregateId}}
 {{^meta.aggregateId}} <h5> {{/meta.aggregateId}}
-Account address property transaction
+Account restriction transaction (by address)
 {{#meta.aggregateId}} </strong> {{/meta.aggregateId}}
 {{^meta.aggregateId}} </h5> {{/meta.aggregateId}}
 
@@ -36,10 +36,10 @@ Account address property transaction
 
 <div class="row">
 	<div class="three columns">
-		property type:
+		Restriction type:
 	</div>
 	<div class="eight columns mono">
-		<b>{{{transaction.propertyType_fmt}}}</b>
+		<b>{{{transaction.restrictionType_fmt}}}</b>
 	</div>
 </div>
 
