@@ -835,14 +835,17 @@
 			var endHeight = parseInt(this.params['endHeight'], 10);
 			var grouping = parseInt(this.params['grouping'], 10);
 
-			getJson('/chain/height', function(items) {
+			getJson('/chain/height')
+			.then(chainHeightObj => {
+				var chainHeight = uint64ToNumber(chainHeightObj.height);
+
 				if (0 === endHeight)
-					endHeight = items.height[0];
+					endHeight = chainHeight;
 
 				if (0 === startHeight)
 					startHeight = endHeight > 240 ? endHeight - 240 : 1;
 
-				var topHeight = items.height[0];
+				var topHeight = chainHeight;
 				if (isNaN(startHeight) || isNaN(endHeight) || endHeight > topHeight || endHeight < startHeight + 60) {
 					return;
 				}
